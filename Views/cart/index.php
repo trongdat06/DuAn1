@@ -25,9 +25,8 @@
                         <tr>
                             <td>
                                 <div class="cart-product">
-                                    <img src="/assets/images/products/<?php echo $item['variant_id']; ?>.jpg" 
-                                         alt="<?php echo htmlspecialchars($item['product_name']); ?>"
-                                         onerror="this.src='/assets/images/placeholder.jpg'">
+                                    <img src="<?php echo getProductImage($item); ?>" 
+                                         alt="<?php echo htmlspecialchars($item['product_name']); ?>">
                                     <div>
                                         <h4><?php echo htmlspecialchars($item['product_name']); ?></h4>
                                         <p><?php echo htmlspecialchars($item['variant_name']); ?></p>

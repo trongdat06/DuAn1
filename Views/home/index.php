@@ -34,9 +34,8 @@
                 <?php foreach ($featuredProducts as $product): ?>
                     <div class="product-card">
                         <div class="product-image">
-                            <img src="/assets/images/products/<?php echo $product['variant_id']; ?>.jpg" 
-                                 alt="<?php echo htmlspecialchars($product['product_name']); ?>"
-                                 onerror="this.src='/assets/images/placeholder.jpg'">
+                            <img src="<?php echo getProductImage($product); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['product_name']); ?>">
                         </div>
                         <div class="product-info">
                             <h3><?php echo htmlspecialchars($product['product_name']); ?></h3>

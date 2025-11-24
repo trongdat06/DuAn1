@@ -151,13 +151,3 @@ function validateForm(formId) {
     return isValid;
 }
 
-// Image placeholder
-document.addEventListener('DOMContentLoaded', function() {
-    const images = document.querySelectorAll('img[onerror]');
-    images.forEach(img => {
-        img.addEventListener('error', function() {
-            this.src = 'assets/images/placeholder.jpg';
-        });
-    });
-});
-

@@ -54,10 +54,9 @@
                     <?php if (!empty($products)): ?>
                         <?php foreach ($products as $product): ?>
                             <div class="product-card">
-                                <div class="product-image">
-                                    <img src="/assets/images/products/<?php echo $product['variant_id']; ?>.jpg" 
-                                         alt="<?php echo htmlspecialchars($product['product_name']); ?>"
-                                         onerror="this.src='/assets/images/placeholder.jpg'">
+                                <div class="product-img">
+                                    <img src="../assets/images/products/<?= echo($product['product_name'])?>.jpg"
+                                         alt="okok  <?php echo htmlspecialchars($product['product_name']); ?>">
                                 </div>
                                 <div class="product-info">
                                     <h3><?php echo htmlspecialchars($product['product_name']); ?></h3>

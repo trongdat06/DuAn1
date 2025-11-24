@@ -14,7 +14,11 @@
                     </div>
                 </div>
                 <div class="hero-image">
-                    <img src="<?php echo assetUrl('images/hero-phones.png'); ?>" alt="Điện thoại" onerror="this.style.display='none'">
+                    <?php 
+                    $heroImagePath = $_SERVER['DOCUMENT_ROOT'] . '/duann1/assets/images/hero-phones.png';
+                    if (file_exists($heroImagePath)): ?>
+                        <img src="<?php echo assetUrl('images/hero-phones.png'); ?>" alt="Điện thoại">
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -70,9 +74,8 @@
                     <?php foreach ($featuredProducts as $product): ?>
                         <a href="<?php echo baseUrl('product-detail.php?id=' . $product['variant_id']); ?>" class="product-card">
                             <div class="product-image">
-                                <img src="<?php echo assetUrl('images/products/' . $product['variant_id'] . '.jpg'); ?>" 
-                                     alt="<?php echo htmlspecialchars($product['product_name']); ?>"
-                                     onerror="this.src='<?php echo assetUrl('images/placeholder.jpg'); ?>'">
+                                <img src="<?php echo getProductImage($product); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['product_name']); ?>">
                             </div>
                             <div class="product-info">
                                 <h3><?php echo htmlspecialchars($product['product_name']); ?></h3>

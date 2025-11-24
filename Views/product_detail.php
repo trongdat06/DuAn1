@@ -4,9 +4,8 @@
     <div class="container">
         <div class="product-detail">
             <div class="product-images">
-                <img src="<?php echo assetUrl('images/products/' . $product['variant_id'] . '.jpg'); ?>" 
-                     alt="<?php echo htmlspecialchars($product['product_name']); ?>"
-                     onerror="this.src='<?php echo assetUrl('images/placeholder.jpg'); ?>'">
+                <img src="<?php echo getProductImage($product); ?>" 
+                     alt="<?php echo htmlspecialchars($product['product_name']); ?>">
             </div>
             <div class="product-detail-info">
                 <h1><?php echo htmlspecialchars($product['product_name']); ?></h1>
