@@ -31,14 +31,14 @@
                 <nav class="main-nav">
                     <a href="<?php echo baseUrl('index.php'); ?>" class="nav-link active">Trang chủ</a>
                     <a href="<?php echo baseUrl('products.php'); ?>" class="nav-link">Sản phẩm</a>
-                    <a href="#" class="nav-link">Giới thiệu</a>
-                    <a href="#" class="nav-link">Liên hệ</a>
+                    <a href="javascript:void(0)" class="nav-link">Giới thiệu</a>
+                    <a href="javascript:void(0)" class="nav-link">Liên hệ</a>
                 </nav>
                 <div class="header-actions">
-                    <div class="search-box">
+                    <form class="search-box" onsubmit="return false;">
                         <input type="text" placeholder="Tìm kiếm điện thoại..." class="search-input">
-                        <button class="search-btn"><i class="fas fa-search"></i></button>
-                    </div>
+                        <button type="button" class="search-btn"><i class="fas fa-search"></i></button>
+                    </form>
                     <a href="<?php echo baseUrl('cart.php'); ?>" class="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
                         <?php if (getCartCount() > 0): ?>

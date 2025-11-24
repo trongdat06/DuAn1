@@ -114,9 +114,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        searchBtn.addEventListener('click', performSearch);
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            performSearch();
+        });
         searchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 performSearch();
             }
         });

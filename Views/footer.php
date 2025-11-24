@@ -8,8 +8,8 @@
                     <div class="social-media">
                         <p>Mạng xã hội</p>
                         <div class="social-icons">
-                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                            <a href="javascript:void(0)" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="javascript:void(0)" class="social-icon"><i class="fab fa-youtube"></i></a>
                         </div>
                     </div>
                 </div>
@@ -25,10 +25,10 @@
                 <div class="footer-column">
                     <h3>Hỗ trợ</h3>
                     <ul>
-                        <li><a href="#">Chính sách bảo hành</a></li>
-                        <li><a href="#">Hướng dẫn mua hàng</a></li>
-                        <li><a href="#">Chính sách đổi trả</a></li>
-                        <li><a href="#">FAQ</a></li>
+                        <li><a href="javascript:void(0)">Chính sách bảo hành</a></li>
+                        <li><a href="javascript:void(0)">Hướng dẫn mua hàng</a></li>
+                        <li><a href="javascript:void(0)">Chính sách đổi trả</a></li>
+                        <li><a href="javascript:void(0)">FAQ</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">

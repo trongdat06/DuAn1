@@ -25,7 +25,7 @@
         <div class="container">
             <div class="section-header">
                 <h2>Thương hiệu nổi bật</h2>
-                <button class="collapse-btn"><i class="fas fa-chevron-up"></i></button>
+                <button type="button" class="collapse-btn" onclick="return false;"><i class="fas fa-chevron-up"></i></button>
             </div>
             <div class="brands-grid">
                 <a href="<?php echo baseUrl('products.php?brand=Samsung'); ?>" class="brand-item">
@@ -85,7 +85,7 @@
                                     ?>
                                 </p>
                                 <p class="product-price"><?php echo formatCurrency($product['price']); ?></p>
-                                <button class="btn-cart-icon" onclick="event.preventDefault(); event.stopPropagation(); addToCart(<?php echo $product['variant_id']; ?>)">
+                                <button type="button" class="btn-cart-icon" onclick="event.preventDefault(); event.stopPropagation(); addToCart(<?php echo $product['variant_id']; ?>)">
                                     <i class="fas fa-shopping-cart"></i>
                                 </button>
                             </div>
@@ -114,7 +114,7 @@
                     <div class="promo-content">
                         <h3>Trả góp 0% lãi suất</h3>
                         <p>Mua điện thoại cao cấp không cần trả trước</p>
-                        <a href="#" class="btn btn-black">Tìm hiểu</a>
+                        <a href="javascript:void(0)" class="btn btn-black">Tìm hiểu</a>
                     </div>
                     <div class="promo-badge">0% APR</div>
                 </div>
