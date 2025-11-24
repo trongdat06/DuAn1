@@ -1,0 +1,45 @@
+/* Admin Panel Styles */
+body {
+    background-color: #f5f5f5;
+}
+
+.navbar-dark {
+    background-color: #343a40 !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table {
+    background-color: white;
+}
+
+.table thead {
+    background-color: #f8f9fa;
+}
+
+.btn {
+    border-radius: 5px;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.form-control, .form-select {
+    border-radius: 5px;
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+}
+
