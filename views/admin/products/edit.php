@@ -1,5 +1,5 @@
 <?php
-require_once "layouts/header.php";
+require_once dirname(dirname(__DIR__)) . "/admin/layouts/header.php";
 ?>
 
 <h2 class="mb-4">Sửa Sản Phẩm</h2>
@@ -171,5 +171,5 @@ document.getElementById('addVariantModal').addEventListener('hidden.bs.modal', f
 });
 </script>
 
-<?php require_once "layouts/footer.php"; ?>
+<?php require_once dirname(dirname(__DIR__)) . "/admin/layouts/footer.php"; ?>
 

@@ -1,6 +1,12 @@
 <?php
 // Cấu hình chung
-define('BASE_URL', 'http://localhost/duann1/');
+// Tự động xác định BASE_URL dựa trên host và đường dẫn tới file index.php
+$protocol = 'http://';
+if ((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === '1')) || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) {
+    $protocol = 'https://';
+}
+$baseUrl = $protocol . ($_SERVER['HTTP_HOST'] ?? 'localhost') . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/';
+define('BASE_URL', $baseUrl);
 define('SITE_NAME', 'Cửa Hàng Điện Thoại');
 
 // Cấu hình session

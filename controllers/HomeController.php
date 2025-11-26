@@ -12,10 +12,12 @@ class HomeController extends BaseController {
     
     public function index() {
         $featuredProducts = $this->productModel->getFeaturedProducts(8);
+        $bestSellingProducts = $this->productModel->getBestSellingProducts(8);
         $categories = $this->productModel->getAllCategories();
         
         $data = [
             'featuredProducts' => $featuredProducts,
+            'bestSellingProducts' => $bestSellingProducts,
             'categories' => $categories,
             'pageTitle' => 'Trang Chủ'
         ];

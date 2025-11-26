@@ -81,19 +81,19 @@ class AdminModel extends BaseModel {
         $sql = "SELECT COUNT(*) as total FROM Products";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $stats['total_products'] = $stmt->fetch()['total'];
+        $stats['total_products'] = (int) $stmt->fetchColumn();
         
         // Tổng số đơn hàng
         $sql = "SELECT COUNT(*) as total FROM Orders";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $stats['total_orders'] = $stmt->fetch()['total'];
+        $stats['total_orders'] = (int) $stmt->fetchColumn();
         
         // Tổng số khách hàng
         $sql = "SELECT COUNT(*) as total FROM Customers";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $stats['total_customers'] = $stmt->fetch()['total'];
+        $stats['total_customers'] = (int) $stmt->fetchColumn();
         
         // Doanh thu tháng này
         $sql = "SELECT SUM(total_amount) as total FROM Orders 
@@ -101,14 +101,14 @@ class AdminModel extends BaseModel {
                 AND YEAR(order_date) = YEAR(CURRENT_DATE())";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $stats['revenue_month'] = $stmt->fetch()['total'] ?? 0;
+        $stats['revenue_month'] = $stmt->fetchColumn() ?? 0;
         
         // Đơn hàng mới hôm nay
         $sql = "SELECT COUNT(*) as total FROM Orders 
-                WHERE DATE(order_date) = CURDATE()";
+            WHERE DATE(order_date) = CURDATE()";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
-        $stats['orders_today'] = $stmt->fetch()['total'];
+        $stats['orders_today'] = (int) $stmt->fetchColumn();
         
         return $stats;
     }

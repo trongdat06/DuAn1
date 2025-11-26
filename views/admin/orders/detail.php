@@ -1,5 +1,5 @@
 <?php
-require_once "layouts/header.php";
+require_once dirname(dirname(__DIR__)) . "/admin/layouts/header.php";
 ?>
 
 <h2 class="mb-4">Chi Tiết Đơn Hàng #<?= $order['order_id'] ?></h2>
@@ -114,5 +114,5 @@ require_once "layouts/header.php";
     <a href="<?= BASE_URL ?>admin/orders" class="btn btn-secondary">Quay Lại</a>
 </div>
 
-<?php require_once "layouts/footer.php"; ?>
+<?php require_once dirname(dirname(__DIR__)) . "/admin/layouts/footer.php"; ?>
 
