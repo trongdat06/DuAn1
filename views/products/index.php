@@ -64,7 +64,7 @@
                 <div class="col-lg-4 col-md-6 col-6">
                     <div class="product-card h-100 border rounded overflow-hidden position-relative shadow-sm">
                         <div class="product-image bg-light text-center p-4" style="height: 220px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                            <i class="bi bi-phone" style="font-size: 120px; color: #6c757d;"></i>
+                            <img src="./public/data/<?=$product['product_name']?>.jpg" alt="">
                             <?php if ($product['category_name'] == 'Điện thoại thông minh'): ?>
                             <span class="badge bg-primary position-absolute top-0 end-0 m-2">Hot</span>
                             <?php endif; ?>
