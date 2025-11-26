@@ -105,6 +105,25 @@ class ProductModel extends BaseModel {
         return $stmt->fetchAll();
     }
     
+    public function getBestSellingProducts($limit = 8) {
+        $sql = "SELECT p.*, pv.variant_id, pv.price, pv.color, pv.storage,
+                       MIN(pv.price) as min_price,
+                       COUNT(od.order_detail_id) as total_sold,
+                       c.category_name
+                FROM Products p 
+                INNER JOIN Product_Variants pv ON p.product_id = pv.product_id 
+                LEFT JOIN Order_Details od ON pv.variant_id = od.variant_id
+                LEFT JOIN Categories c ON p.category_id = c.category_id 
+                WHERE pv.stock_quantity >= 0
+                GROUP BY p.product_id 
+                ORDER BY total_sold DESC, p.created_at DESC 
+                LIMIT :limit";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+    
     // Admin functions
     public function createProduct($data) {
         $sql = "INSERT INTO Products (product_name, brand, description, category_id, supplier_id) 

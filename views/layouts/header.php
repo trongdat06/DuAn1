@@ -55,9 +55,31 @@
                             ?>
                         </span>
                     </a>
-                    <a class="nav-link" href="<?= BASE_URL ?>auth/login">
-                        <i class="bi bi-person fs-4"></i>
-                    </a>
+                    <?php if (isset($_SESSION['customer_id'])): ?>
+                        <!-- Customer logged in -->
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="customerMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i> <?= htmlspecialchars($_SESSION['customer_name'] ?? 'Khách hàng') ?>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="customerMenu">
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>customer/profile">
+                                    <i class="bi bi-person"></i> Tài Khoản
+                                </a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>customer/orders">
+                                    <i class="bi bi-bag"></i> Đơn Hàng
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>auth/logout">
+                                    <i class="bi bi-box-arrow-right"></i> Đăng Xuất
+                                </a></li>
+                            </ul>
+                        </div>
+                    <?php else: ?>
+                        <!-- Guest user -->
+                        <a class="nav-link" href="<?= BASE_URL ?>auth/login" title="Đăng nhập">
+                            <i class="bi bi-person fs-4"></i>
+                        </a>
+                    <?php endif; ?>
                     <?php if (isset($_SESSION['admin_id'])): ?>
                     <a class="nav-link ms-2" href="<?= BASE_URL ?>admin/dashboard">
                         <small>Admin</small>

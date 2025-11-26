@@ -1,5 +1,5 @@
 <?php
-require_once "layouts/header.php";
+require_once dirname(dirname(__DIR__)) . "/admin/layouts/header.php";
 ?>
 
 <h2 class="mb-4">Thêm Sản Phẩm Mới</h2>
@@ -44,5 +44,5 @@ require_once "layouts/header.php";
     </div>
 </div>
 
-<?php require_once "layouts/footer.php"; ?>
+<?php require_once dirname(dirname(__DIR__)) . "/admin/layouts/footer.php"; ?>
 
