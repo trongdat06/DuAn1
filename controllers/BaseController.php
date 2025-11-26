@@ -3,14 +3,15 @@ class BaseController {
     
     protected function view($viewName, $data = [], $adminLayout = false) {
         extract($data);
+        $basePath = dirname(__DIR__);
         if ($adminLayout) {
-            require_once "views/admin/layouts/header.php";
-            require_once "views/$viewName.php";
-            require_once "views/admin/layouts/footer.php";
+            require_once $basePath . "/views/admin/layouts/header.php";
+            require_once $basePath . "/views/$viewName.php";
+            require_once $basePath . "/views/admin/layouts/footer.php";
         } else {
-            require_once "views/layouts/header.php";
-            require_once "views/$viewName.php";
-            require_once "views/layouts/footer.php";
+            require_once $basePath . "/views/layouts/header.php";
+            require_once $basePath . "/views/$viewName.php";
+            require_once $basePath . "/views/layouts/footer.php";
         }
     }
     
