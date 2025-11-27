@@ -41,9 +41,18 @@
     <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3 mb-5 justify-content-center">
         <?php foreach ($categories as $category): ?>
         <div class="col">
-            <a href="<?= BASE_URL ?>product/category/<?= $category['category_id'] ?>" class="text-decoration-none text-dark d-block text-center category-card p-3 rounded shadow-sm">
-                <i class="bi bi-phone-fill fs-3 text-secondary mb-2"></i>
-                <p class="mb-0 fw-bold small"><?= htmlspecialchars($category['category_name']) ?></p>
+            <a href="<?= BASE_URL ?>product/category/<?= $category['category_id'] ?>" class="text-decoration-none text-dark d-block text-center category-card rounded shadow-sm overflow-hidden">
+                <?php 
+                    // Tạo đường dẫn ảnh danh mục
+                    $categoryImageName = str_replace(' ', '_', strtolower($category['category_name']));
+                    $categoryImagePath = __DIR__ . '/../public/images/categories/' . $categoryImageName . '.jpg';
+                    $categoryImageUrl = BASE_URL . 'public/images/categories/' . $categoryImageName . '.jpg';
+                    $hasImage = file_exists($categoryImagePath);
+                ?>
+
+                <div class="p-3">
+                    <p class="mb-0 fw-bold small"><?= htmlspecialchars($category['category_name']) ?></p>
+                </div>
             </a>
         </div>
         <?php endforeach; ?>
@@ -66,18 +75,19 @@
         <?php endif; ?>
     </div>
 
+    <h3 class="fw-bold mb-4 border-bottom pb-2"><i class="bi bi-fire text-danger me-2"></i> Sản Phẩm Bán Chạy</h3>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
-        <?php if (!empty($newProducts)): ?>
-            <?php foreach ($newProducts as $product): ?>
+        <?php if (!empty($bestSellingProducts)): ?>
+            <?php foreach ($bestSellingProducts as $product): ?>
                 <div class="col">
                     <?php 
-                        // Dòng fix lỗi tương tự: Include partial view và truyền biến $product vào
+                        // Include partial view và truyền biến $product vào
                         include __DIR__ . '/../products/product_card.php';
                     ?>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="col-12"><div class="alert alert-warning">Chưa có sản phẩm mới nào.</div></div>
+            <div class="col-12"><div class="alert alert-warning">Chưa có sản phẩm bán chạy nào.</div></div>
         <?php endif; ?>
     </div>
 
@@ -85,12 +95,31 @@
 
 <style>
 .category-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid #eee;
+    background: #fff;
+    display: block;
 }
 .category-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    text-decoration: none;
 }
-/* Cần CSS cho Product Card (nếu chưa có trong style.css) */
+.category-image-wrapper {
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-image {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover .category-image-wrapper {
+    transform: scale(1.05);
+}
+
+.category-card:hover .category-image {
+    transform: scale(1.15);
+}
 </style>

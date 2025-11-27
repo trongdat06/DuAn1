@@ -41,7 +41,7 @@ Dự án bán điện thoại và phụ kiện điện tử được xây dựng
    - Mở file `config/config.php`
    - Cập nhật BASE_URL nếu cần:
      ```php
-     define('BASE_URL', 'http://localhost/duann1/');
+     define('BASE_URL', 'http://localhost/DuAn1/');
      ```
 
 4. Bật mod_rewrite:
@@ -51,13 +51,13 @@ Dự án bán điện thoại và phụ kiện điện tử được xây dựng
 ## Sử Dụng
 
 ### Đăng Nhập Admin:
-- URL: `http://localhost/duann1/auth/login`
+- URL: `http://localhost/DuAn1/auth/login`
 - Username: `admin`
 - Password: `password`
 
 ### Cấu Trúc Thư Mục:
 ```
-duann1/
+DuAn1/
 ├── config/          # Cấu hình
 ├── controllers/     # Controllers
 ├── models/          # Models

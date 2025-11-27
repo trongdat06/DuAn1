@@ -36,6 +36,18 @@ require_once dirname(dirname(__DIR__)) . "/admin/layouts/header.php";
                         <label for="supplier_id" class="form-label">Nhà Cung Cấp</label>
                         <input type="number" class="form-control" id="supplier_id" name="supplier_id">
                     </div>
+                    <div class="mb-3">
+                        <label for="product_image" class="form-label">Ảnh Sản Phẩm</label>
+                        <input type="file" class="form-control" id="product_image" name="product_image" accept="image/*">
+                        <small class="text-muted">Tên file ảnh sẽ tự động lấy từ tên sản phẩm (ví dụ: iPhone 15 Pro Max.jpg)</small>
+                        <div class="mt-2">
+                            <small class="text-info">
+                                <i class="bi bi-info-circle"></i> 
+                                Sau khi tạo sản phẩm, bạn có thể upload ảnh tại trang chỉnh sửa. 
+                                Ảnh sẽ được lưu tại: <code>public/data/[Tên Sản Phẩm].jpg</code>
+                            </small>
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-primary">Tạo Sản Phẩm</button>
                     <a href="<?= BASE_URL ?>admin/products" class="btn btn-secondary">Hủy</a>
                 </form>

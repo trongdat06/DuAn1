@@ -10,20 +10,35 @@ class CartModel extends BaseModel {
         
         $cartItems = [];
         foreach ($_SESSION['cart'] as $variantId => $quantity) {
-            $sql = "SELECT pv.*, p.product_name, p.brand, p.description 
+            $sql = "SELECT pv.*, p.product_id, p.product_name, p.brand, p.description, 
+                           pv.variant_name, pv.color, pv.storage
                     FROM Product_Variants pv 
                     JOIN Products p ON pv.product_id = p.product_id 
-                    WHERE pv.variant_id = :variant_id AND pv.stock_quantity >= :quantity";
+                    WHERE pv.variant_id = :variant_id";
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':variant_id', $variantId);
-            $stmt->bindParam(':quantity', $quantity);
             $stmt->execute();
             $item = $stmt->fetch();
             
             if ($item) {
-                $item['quantity'] = $quantity;
-                $item['subtotal'] = $item['price'] * $quantity;
-                $cartItems[] = $item;
+                // Điều chỉnh số lượng nếu vượt quá tồn kho
+                if ($item['stock_quantity'] < $quantity) {
+                    $quantity = $item['stock_quantity'];
+                    $_SESSION['cart'][$variantId] = $quantity;
+                }
+                
+                // Chỉ thêm vào danh sách nếu còn hàng
+                if ($quantity > 0) {
+                    $item['quantity'] = $quantity;
+                    $item['subtotal'] = $item['price'] * $quantity;
+                    $cartItems[] = $item;
+                } else {
+                    // Xóa khỏi giỏ hàng nếu hết hàng
+                    unset($_SESSION['cart'][$variantId]);
+                }
+            } else {
+                // Xóa khỏi giỏ hàng nếu sản phẩm không tồn tại
+                unset($_SESSION['cart'][$variantId]);
             }
         }
         

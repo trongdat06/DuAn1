@@ -26,10 +26,10 @@
                         <a class="nav-link" href="<?= BASE_URL ?>product/index">Sản phẩm</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Giới thiệu</a>
+                        <a class="nav-link" href="<?= BASE_URL ?>page/about">Giới thiệu</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Liên hệ</a>
+                        <a class="nav-link" href="<?= BASE_URL ?>page/contact">Liên hệ</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">

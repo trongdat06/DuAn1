@@ -26,10 +26,16 @@
                         <a class="nav-link" href="<?= BASE_URL ?>admin/products">Sản Phẩm</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="<?= BASE_URL ?>admin/categories">Danh Mục</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="<?= BASE_URL ?>admin/customers">Khách Hàng</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= BASE_URL ?>admin/orders">Đơn Hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?= BASE_URL ?>admin/reviews">Đánh Giá</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">

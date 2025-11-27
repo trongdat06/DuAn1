@@ -4,6 +4,7 @@ require_once 'models/AdminModel.php';
 require_once 'models/ProductModel.php';
 require_once 'models/CustomerModel.php';
 require_once 'models/OrderModel.php';
+require_once 'models/ReviewModel.php';
 
 class AdminController extends BaseController {
     
@@ -11,6 +12,7 @@ class AdminController extends BaseController {
     private $productModel;
     private $customerModel;
     private $orderModel;
+    private $reviewModel;
     
     public function __construct() {
         $this->checkAuth();
@@ -18,6 +20,7 @@ class AdminController extends BaseController {
         $this->productModel = new ProductModel();
         $this->customerModel = new CustomerModel();
         $this->orderModel = new OrderModel();
+        $this->reviewModel = new ReviewModel();
     }
     
     private function checkAuth() {
@@ -126,6 +129,64 @@ class AdminController extends BaseController {
         $this->redirect('admin/products');
     }
     
+    public function productUploadImage($id) {
+        $product = $this->productModel->getProductById($id);
+        
+        if (!$product) {
+            $_SESSION['error'] = 'Sản phẩm không tồn tại';
+            $this->redirect('admin/products');
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['product_image'])) {
+            $file = $_FILES['product_image'];
+            
+            // Kiểm tra lỗi upload
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $_SESSION['error'] = 'Lỗi khi upload file';
+                $this->redirect('admin/productEdit/' . $id);
+            }
+            
+            // Kiểm tra loại file
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            
+            if (!in_array($mimeType, $allowedTypes)) {
+                $_SESSION['error'] = 'Chỉ chấp nhận file ảnh JPG, JPEG hoặc PNG';
+                $this->redirect('admin/productEdit/' . $id);
+            }
+            
+            // Tạo thư mục nếu chưa tồn tại
+            $uploadDir = __DIR__ . '/../public/data/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            // Tên file = tên sản phẩm + .jpg
+            $fileName = $product['product_name'] . '.jpg';
+            $targetPath = $uploadDir . $fileName;
+            
+            // Chuyển đổi PNG sang JPG nếu cần
+            if ($mimeType === 'image/png') {
+                $image = imagecreatefrompng($file['tmp_name']);
+                imagejpeg($image, $targetPath, 90);
+                imagedestroy($image);
+            } else {
+                // Di chuyển file
+                if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    $_SESSION['error'] = 'Không thể lưu file';
+                    $this->redirect('admin/productEdit/' . $id);
+                }
+            }
+            
+            $_SESSION['success'] = 'Upload ảnh thành công!';
+            $this->redirect('admin/productEdit/' . $id);
+        }
+        
+        $this->redirect('admin/productEdit/' . $id);
+    }
+    
     public function variantCreate() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
@@ -184,56 +245,71 @@ class AdminController extends BaseController {
     
     // Quản lý khách hàng
     public function customers() {
+        $search = $_GET['search'] ?? '';
+        $statusFilter = $_GET['status'] ?? '';
+        
         $customers = $this->customerModel->getAllCustomers();
+        
+        // Filter by search
+        if (!empty($search)) {
+            $customers = array_filter($customers, function($customer) use ($search) {
+                return stripos($customer['full_name'], $search) !== false 
+                    || stripos($customer['email'], $search) !== false
+                    || stripos($customer['phone_number'], $search) !== false;
+            });
+        }
+        
+        // Filter by status
+        if (!empty($statusFilter)) {
+            $customers = array_filter($customers, function($customer) use ($statusFilter) {
+                $status = $customer['status'] ?? 'active';
+                return $status === $statusFilter;
+            });
+        }
+        
+        // Reset array keys
+        $customers = array_values($customers);
         
         $data = [
             'customers' => $customers,
+            'search' => $search,
+            'statusFilter' => $statusFilter,
             'pageTitle' => 'Quản Lý Khách Hàng'
         ];
         
         $this->view('admin/customers/index', $data, true);
     }
     
-    public function customerEdit($id) {
+    public function customerToggleStatus($id) {
         $customer = $this->customerModel->getCustomerById($id);
-        
         if (!$customer) {
+            $_SESSION['error'] = 'Không tìm thấy khách hàng';
             $this->redirect('admin/customers');
+            return;
         }
         
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'full_name' => $_POST['full_name'],
-                'phone_number' => $_POST['phone_number'],
-                'email' => $_POST['email'],
-                'address' => $_POST['address'],
-                'gender' => $_POST['gender'],
-                'date_of_birth' => $_POST['date_of_birth'] ?: null
-            ];
-            
-            if ($this->customerModel->updateCustomer($id, $data)) {
-                $_SESSION['success'] = 'Cập nhật khách hàng thành công';
-                $this->redirect('admin/customers');
-            } else {
-                $_SESSION['error'] = 'Không thể cập nhật khách hàng';
-            }
-        }
-        
-        $data = [
-            'customer' => $customer,
-            'pageTitle' => 'Sửa Khách Hàng'
-        ];
-        
-        $this->view('admin/customers/edit', $data, true);
-    }
-    
-    public function customerDelete($id) {
-        if ($this->customerModel->deleteCustomer($id)) {
-            $_SESSION['success'] = 'Xóa khách hàng thành công';
+        if ($this->customerModel->toggleCustomerStatus($id)) {
+            $newStatus = ($customer['status'] ?? 'active') == 'active' ? 'khóa' : 'mở khóa';
+            $_SESSION['success'] = 'Đã ' . $newStatus . ' khách hàng ' . htmlspecialchars($customer['full_name']) . ' thành công';
         } else {
-            $_SESSION['error'] = 'Không thể xóa khách hàng';
+            $_SESSION['error'] = 'Không thể cập nhật trạng thái khách hàng';
         }
-        $this->redirect('admin/customers');
+        
+        // Preserve filters
+        $queryParams = [];
+        if (!empty($_GET['search'])) {
+            $queryParams['search'] = $_GET['search'];
+        }
+        if (!empty($_GET['status'])) {
+            $queryParams['status'] = $_GET['status'];
+        }
+        
+        $redirectUrl = 'admin/customers';
+        if (!empty($queryParams)) {
+            $redirectUrl .= '?' . http_build_query($queryParams);
+        }
+        
+        $this->redirect($redirectUrl);
     }
     
     // Quản lý đơn hàng
@@ -269,6 +345,187 @@ class AdminController extends BaseController {
         ];
         
         $this->view('admin/orders/detail', $data, true);
+    }
+    
+    // Quản lý danh mục
+    public function categories() {
+        $categories = $this->productModel->getAllCategories();
+        
+        $data = [
+            'categories' => $categories,
+            'pageTitle' => 'Quản Lý Danh Mục'
+        ];
+        
+        $this->view('admin/categories/index', $data, true);
+    }
+    
+    public function categoryCreate() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'category_name' => $_POST['category_name'],
+                'description' => $_POST['description'] ?? ''
+            ];
+            
+            if ($this->productModel->createCategory($data)) {
+                $_SESSION['success'] = 'Tạo danh mục thành công';
+                $this->redirect('admin/categories');
+            } else {
+                $_SESSION['error'] = 'Không thể tạo danh mục';
+            }
+        }
+        
+        $data = [
+            'pageTitle' => 'Thêm Danh Mục'
+        ];
+        
+        $this->view('admin/categories/create', $data, true);
+    }
+    
+    public function categoryEdit($id) {
+        $category = $this->productModel->getCategoryById($id);
+        
+        if (!$category) {
+            $this->redirect('admin/categories');
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'category_name' => $_POST['category_name'],
+                'description' => $_POST['description'] ?? ''
+            ];
+            
+            if ($this->productModel->updateCategory($id, $data)) {
+                $_SESSION['success'] = 'Cập nhật danh mục thành công';
+                $this->redirect('admin/categories');
+            } else {
+                $_SESSION['error'] = 'Không thể cập nhật danh mục';
+            }
+        }
+        
+        $data = [
+            'category' => $category,
+            'pageTitle' => 'Sửa Danh Mục'
+        ];
+        
+        $this->view('admin/categories/edit', $data, true);
+    }
+    
+    public function categoryUploadImage($id) {
+        $category = $this->productModel->getCategoryById($id);
+        
+        if (!$category) {
+            $_SESSION['error'] = 'Danh mục không tồn tại';
+            $this->redirect('admin/categories');
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['category_image'])) {
+            $file = $_FILES['category_image'];
+            
+            // Kiểm tra lỗi upload
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $_SESSION['error'] = 'Lỗi khi upload file';
+                $this->redirect('admin/categoryEdit/' . $id);
+            }
+            
+            // Kiểm tra loại file
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            
+            if (!in_array($mimeType, $allowedTypes)) {
+                $_SESSION['error'] = 'Chỉ chấp nhận file ảnh JPG, JPEG hoặc PNG';
+                $this->redirect('admin/categoryEdit/' . $id);
+            }
+            
+            // Tạo thư mục nếu chưa tồn tại
+            $uploadDir = __DIR__ . '/../public/images/categories/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            // Tạo tên file từ tên danh mục (chuyển thành chữ thường, thay khoảng trắng bằng dấu gạch dưới)
+            $categoryImageName = str_replace(' ', '_', strtolower($category['category_name']));
+            $fileName = $categoryImageName . '.jpg';
+            $targetPath = $uploadDir . $fileName;
+            
+            // Chuyển đổi PNG sang JPG nếu cần
+            if ($mimeType === 'image/png' && function_exists('imagecreatefrompng')) {
+                $image = imagecreatefrompng($file['tmp_name']);
+                imagejpeg($image, $targetPath, 90);
+                imagedestroy($image);
+            } else {
+                // Di chuyển file
+                if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    $_SESSION['error'] = 'Không thể lưu file ảnh';
+                    $this->redirect('admin/categoryEdit/' . $id);
+                }
+            }
+            
+            $_SESSION['success'] = 'Upload ảnh danh mục thành công';
+            $this->redirect('admin/categoryEdit/' . $id);
+        }
+        
+        $this->redirect('admin/categories');
+    }
+    
+    public function categoryDelete($id) {
+        if ($this->productModel->deleteCategory($id)) {
+            $_SESSION['success'] = 'Xóa danh mục thành công';
+        } else {
+            $_SESSION['error'] = 'Không thể xóa danh mục (có thể đang được sử dụng bởi sản phẩm)';
+        }
+        $this->redirect('admin/categories');
+    }
+    
+    // Quản lý đánh giá
+    public function reviews() {
+        $statusFilter = $_GET['status'] ?? '';
+        $reviews = $this->reviewModel->getAllReviews();
+        
+        // Filter by status
+        if (!empty($statusFilter)) {
+            $reviews = array_filter($reviews, function($review) use ($statusFilter) {
+                $status = $review['status'] ?? 'pending';
+                return $status === $statusFilter;
+            });
+            $reviews = array_values($reviews);
+        }
+        
+        $data = [
+            'reviews' => $reviews,
+            'statusFilter' => $statusFilter,
+            'pageTitle' => 'Quản Lý Đánh Giá'
+        ];
+        
+        $this->view('admin/reviews/index', $data, true);
+    }
+    
+    public function reviewApprove($id) {
+        if ($this->reviewModel->updateReviewStatus($id, 'approved')) {
+            $_SESSION['success'] = 'Đã duyệt đánh giá';
+        } else {
+            $_SESSION['error'] = 'Không thể duyệt đánh giá';
+        }
+        $this->redirect('admin/reviews');
+    }
+    
+    public function reviewReject($id) {
+        if ($this->reviewModel->updateReviewStatus($id, 'rejected')) {
+            $_SESSION['success'] = 'Đã từ chối đánh giá';
+        } else {
+            $_SESSION['error'] = 'Không thể từ chối đánh giá';
+        }
+        $this->redirect('admin/reviews');
+    }
+    
+    public function reviewDelete($id) {
+        if ($this->reviewModel->deleteReview($id)) {
+            $_SESSION['success'] = 'Đã xóa đánh giá';
+        } else {
+            $_SESSION['error'] = 'Không thể xóa đánh giá';
+        }
+        $this->redirect('admin/reviews');
     }
 }
 ?>

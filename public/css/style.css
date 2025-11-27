@@ -76,25 +76,46 @@ body {
 
 /* Product Cards */
 .product-card {
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #fff;
     border: 1px solid #e9ecef;
-}
-
-.product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-    border-color: #0d6efd;
-}
-
-.product-image {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    transition: transform 0.3s ease;
+    border-radius: 12px;
     overflow: hidden;
 }
 
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12) !important;
+    border-color: #0d6efd;
+}
+
+.product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.product-image {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .product-card:hover .product-image {
-    transform: scale(1.05);
+    transform: scale(1.08);
+}
+
+.product-name {
+    color: #212529;
+    transition: color 0.3s ease;
+}
+
+.product-card:hover .product-name {
+    color: #0d6efd;
+}
+
+.product-description {
+    color: #6c757d;
+    font-size: 0.875rem;
+    line-height: 1.5;
 }
 
 .product-name {
@@ -218,6 +239,132 @@ footer a:hover {
     font-weight: 500;
 }
 
+/* Product Detail Page */
+.variant-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.variant-card.border-primary {
+    background-color: #f0f7ff;
+}
+
+/* Banner Carousel */
+.carousel-item img {
+    filter: brightness(0.95);
+    transition: filter 0.3s;
+}
+
+.carousel-item:hover img {
+    filter: brightness(1);
+}
+
+.carousel-caption {
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+}
+
+/* Loading Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.product-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Button Improvements */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+}
+
+/* Card Hover Effects */
+.card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Input Focus */
+.form-control:focus,
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Badge Improvements */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+    border-radius: 6px;
+}
+
+/* Alert Improvements */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Table Improvements */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+    transition: all 0.2s;
+}
+
+/* Category Cards */
+.category-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #eee;
+    background: #fff;
+    display: block;
+}
+
+.category-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    text-decoration: none;
+}
+
+.category-image-wrapper {
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card:hover .category-image-wrapper {
+    transform: scale(1.05);
+}
+
+.category-image-wrapper img {
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-image-wrapper img {
+    transform: scale(1.1);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .hero-section {
@@ -242,6 +389,15 @@ footer a:hover {
     
     .brand-card, .service-card {
         margin-bottom: 15px;
+    }
+    
+    .carousel-caption {
+        font-size: 0.875rem;
+        padding: 0.5rem !important;
+    }
+    
+    .category-image-wrapper {
+        height: 100px !important;
     }
 }
 

@@ -63,6 +63,33 @@ class CustomerModel extends BaseModel {
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }
+    
+    public function toggleCustomerStatus($id) {
+        // Kiểm tra xem bảng có cột status không, nếu không thì tạo
+        try {
+            $checkColumn = $this->conn->query("SHOW COLUMNS FROM Customers LIKE 'status'");
+            if ($checkColumn->rowCount() == 0) {
+                $this->conn->exec("ALTER TABLE Customers ADD COLUMN status VARCHAR(20) DEFAULT 'active'");
+            }
+        } catch (Exception $e) {
+            // Column đã tồn tại hoặc có lỗi
+        }
+        
+        // Lấy trạng thái hiện tại
+        $customer = $this->getCustomerById($id);
+        if (!$customer) {
+            return false;
+        }
+        
+        $currentStatus = $customer['status'] ?? 'active';
+        $newStatus = ($currentStatus == 'active' || $currentStatus == null) ? 'locked' : 'active';
+        
+        $sql = "UPDATE Customers SET status = :status WHERE customer_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':status', $newStatus);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
 }
 ?>
 

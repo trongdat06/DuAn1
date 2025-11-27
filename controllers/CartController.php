@@ -33,6 +33,33 @@ class CartController extends BaseController {
     }
     
     public function add() {
+        // Kiểm tra đăng nhập
+        if (!isset($_SESSION['customer_id'])) {
+            if (isset($_POST['ajax'])) {
+                $this->jsonResponse([
+                    'success' => false,
+                    'message' => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng',
+                    'requireLogin' => true,
+                    'loginUrl' => BASE_URL . 'auth/login'
+                ], 401);
+                return;
+            } else {
+                $_SESSION['error'] = 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng';
+                
+                // Lưu URL redirect (chuyển từ absolute sang relative nếu cần)
+                $referer = $_SERVER['HTTP_REFERER'] ?? '';
+                if (!empty($referer) && strpos($referer, BASE_URL) !== false) {
+                    $redirectUrl = str_replace(BASE_URL, '', $referer);
+                    $_SESSION['redirect_after_login'] = $redirectUrl;
+                } else {
+                    $_SESSION['redirect_after_login'] = 'product/index';
+                }
+                
+                $this->redirect('auth/login');
+                return;
+            }
+        }
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $variantId = isset($_POST['variant_id']) ? (int)$_POST['variant_id'] : 0;
             $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
@@ -72,8 +99,24 @@ class CartController extends BaseController {
             
             if ($variantId > 0) {
                 if ($this->cartModel->updateCart($variantId, $quantity)) {
+                    if (isset($_POST['ajax']) || isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+                        $this->jsonResponse([
+                            'success' => true,
+                            'message' => 'Đã cập nhật giỏ hàng',
+                            'cartCount' => $this->cartModel->getCartCount(),
+                            'cartTotal' => $this->cartModel->getCartTotal()
+                        ]);
+                        return;
+                    }
                     $_SESSION['success'] = 'Đã cập nhật giỏ hàng';
                 } else {
+                    if (isset($_POST['ajax']) || isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+                        $this->jsonResponse([
+                            'success' => false,
+                            'message' => 'Không đủ hàng trong kho'
+                        ], 400);
+                        return;
+                    }
                     $_SESSION['error'] = 'Không đủ hàng trong kho';
                 }
             }
@@ -84,6 +127,26 @@ class CartController extends BaseController {
     public function remove($variantId) {
         if ($this->cartModel->removeFromCart($variantId)) {
             $_SESSION['success'] = 'Đã xóa sản phẩm khỏi giỏ hàng';
+        }
+        $this->redirect('cart/index');
+    }
+    
+    public function removeMultiple() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['variant_ids'])) {
+            $variantIds = $_POST['variant_ids'];
+            $removedCount = 0;
+            
+            foreach ($variantIds as $variantId) {
+                if ($this->cartModel->removeFromCart((int)$variantId)) {
+                    $removedCount++;
+                }
+            }
+            
+            if ($removedCount > 0) {
+                $_SESSION['success'] = 'Đã xóa ' . $removedCount . ' sản phẩm khỏi giỏ hàng';
+            } else {
+                $_SESSION['error'] = 'Không thể xóa sản phẩm';
+            }
         }
         $this->redirect('cart/index');
     }

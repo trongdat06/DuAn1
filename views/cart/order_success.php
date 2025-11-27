@@ -1,7 +1,12 @@
 <div class="text-center mb-5">
-    <i class="bi bi-check-circle-fill text-success" style="font-size: 80px;"></i>
-    <h2 class="mt-3">Đặt Hàng Thành Công!</h2>
-    <p class="lead">Cảm ơn bạn đã mua sắm tại <?= SITE_NAME ?></p>
+    <div class="mb-4">
+        <div class="d-inline-block p-4 rounded-circle bg-success bg-opacity-10">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 80px;"></i>
+        </div>
+    </div>
+    <h2 class="mt-3 fw-bold text-success">Đặt Hàng Thành Công!</h2>
+    <p class="lead text-muted">Cảm ơn bạn đã mua sắm tại <strong><?= SITE_NAME ?></strong></p>
+    <p class="text-muted">Mã đơn hàng của bạn: <strong class="text-primary">#<?= $order['order_id'] ?></strong></p>
 </div>
 
 <div class="row justify-content-center">
@@ -73,8 +78,15 @@
                     </tfoot>
                 </table>
                 
-                <div class="text-center mt-4">
-                    <a href="<?= BASE_URL ?>product/index" class="btn btn-primary">Tiếp Tục Mua Sắm</a>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <a href="<?= BASE_URL ?>product/index" class="btn btn-primary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i> Tiếp Tục Mua Sắm
+                    </a>
+                    <?php if (isset($_SESSION['customer_id'])): ?>
+                    <a href="<?= BASE_URL ?>customer/orders" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-bag me-2"></i> Xem Đơn Hàng Của Tôi
+                    </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

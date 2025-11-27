@@ -45,30 +45,73 @@
                 ?>
                 <div class="col-lg-4 col-md-6 col-6">
                     <div class="product-card h-100 border rounded overflow-hidden position-relative shadow-sm">
-                        <div class="product-image bg-light text-center p-4" style="height: 220px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                            <i class="bi bi-phone" style="font-size: 120px; color: #6c757d;"></i>
-                        </div>
-                        <div class="product-info p-3">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="product-name fw-bold mb-0 flex-grow-1"><?= htmlspecialchars($product['product_name']) ?></h6>
+                        <a href="<?= BASE_URL ?>product/detail/<?= $product['product_id'] ?>" class="text-decoration-none">
+                            <div class="product-image-wrapper position-relative" style="height: 220px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <?php 
+                                    $imgUrl = BASE_URL . "public/data/" . rawurlencode($product['product_name'] ?? 'default') . ".jpg";
+                                ?>
+                                <img src="<?= $imgUrl ?>" 
+                                     alt="<?= htmlspecialchars($product['product_name'] ?? 'Product') ?>" 
+                                     class="img-fluid product-image" 
+                                     style="max-height: 100%; max-width: 100%; object-fit: contain; transition: transform 0.3s ease;"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="position-absolute w-100 h-100 d-none align-items-center justify-content-center" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                    <i class="bi bi-phone" style="font-size: 80px; color: #6c757d;"></i>
+                                </div>
+                                
+                                <?php if ($minPrice > 0 && $minPrice < 10000000): ?>
+                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2 rounded-pill shadow-sm">
+                                        <i class="bi bi-lightning-charge"></i> SALE
+                                    </span>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($product['brand'])): ?>
+                                    <span class="badge bg-primary position-absolute top-0 end-0 m-2 rounded-pill shadow-sm">
+                                        <?= htmlspecialchars($product['brand']) ?>
+                                    </span>
+                                <?php endif; ?>
                             </div>
-                            <p class="text-muted small mb-2">
-                                <i class="bi bi-tag"></i> <?= htmlspecialchars($product['brand']) ?>
+                        </a>
+                        <div class="product-info p-3">
+                            <a href="<?= BASE_URL ?>product/detail/<?= $product['product_id'] ?>" class="text-decoration-none text-dark">
+                                <h6 class="product-name fw-bold mb-2" style="min-height: 48px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    <?= htmlspecialchars($product['product_name']) ?>
+                                </h6>
+                            </a>
+                            
+                            <?php 
+                                // Tạo mô tả ngắn
+                                $shortDesc = '';
+                                if (!empty($product['description'])) {
+                                    $desc = strip_tags($product['description']);
+                                    $shortDesc = mb_strlen($desc) > 60 ? mb_substr($desc, 0, 60) . '...' : $desc;
+                                } else {
+                                    $shortDesc = 'Sản phẩm chất lượng cao, chính hãng.';
+                                }
+                            ?>
+                            <p class="text-muted small mb-2 product-short-desc" style="min-height: 36px; font-size: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                <?= htmlspecialchars($shortDesc) ?>
                             </p>
+                            
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-tag-fill text-primary"></i> 
+                                <span class="fw-semibold"><?= htmlspecialchars($product['brand'] ?? 'N/A') ?></span>
+                            </p>
+                            
                             <?php if ($firstVariant): ?>
                             <p class="text-muted small mb-2">
-                                <i class="bi bi-hdd"></i> <?= htmlspecialchars($firstVariant['storage']) ?> | 
-                                <i class="bi bi-palette"></i> <?= htmlspecialchars($firstVariant['color']) ?>
+                                <i class="bi bi-hdd text-info"></i> <?= htmlspecialchars($firstVariant['storage']) ?> | 
+                                <i class="bi bi-palette text-warning"></i> <?= htmlspecialchars($firstVariant['color']) ?>
                             </p>
                             <?php endif; ?>
                             <div class="mb-2">
                                 <?php if ($minPrice > 0): ?>
                                     <?php if ($minPrice == $maxPrice): ?>
-                                    <p class="product-price text-primary fw-bold fs-5 mb-0">
+                                    <p class="product-price text-danger fw-bold fs-5 mb-0">
                                         <?= number_format($minPrice, 0, ',', '.') ?>₫
                                     </p>
                                     <?php else: ?>
-                                    <p class="product-price text-primary fw-bold fs-6 mb-0">
+                                    <p class="product-price text-danger fw-bold fs-6 mb-0">
                                         Từ <?= number_format($minPrice, 0, ',', '.') ?>₫
                                     </p>
                                     <p class="text-muted small mb-0">
@@ -76,7 +119,9 @@
                                     </p>
                                     <?php endif; ?>
                                 <?php else: ?>
-                                <p class="text-danger small mb-0">Hết hàng</p>
+                                <p class="text-danger small mb-0 fw-bold">
+                                    <i class="bi bi-x-circle"></i> Hết hàng
+                                </p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -118,12 +163,21 @@
     box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
 }
 
+.product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
 .product-image {
-    transition: transform 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .product-card:hover .product-image {
-    transform: scale(1.05);
+    transform: scale(1.08);
+}
+
+.product-card:hover {
+    border-color: #0d6efd;
 }
 
 .product-name {

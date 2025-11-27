@@ -36,11 +36,11 @@ private $password = "";              // Password MySQL (để trống nếu khô
 Mở file `config/config.php` và cập nhật BASE_URL:
 
 ```php
-define('BASE_URL', 'http://localhost/duann1/');
+define('BASE_URL', 'http://localhost/DuAn1/');
 ```
 
 **Lưu ý:** 
-- Thay `duann1` bằng tên thư mục dự án của bạn
+- Thay `DuAn1` bằng tên thư mục dự án của bạn
 - Nếu chạy trên domain, thay bằng domain của bạn (ví dụ: `http://yourdomain.com/`)
 
 ### 4. Kiểm Tra mod_rewrite
@@ -61,7 +61,7 @@ define('BASE_URL', 'http://localhost/duann1/');
 
 Sau khi import database, bạn có thể đăng nhập với:
 
-- **URL:** `http://localhost/duann1/auth/login`
+- **URL:** `http://localhost/DuAn1/auth/login`
 - **Username:** `admin`
 - **Password:** `password`
 
@@ -71,9 +71,9 @@ Sau khi import database, bạn có thể đăng nhập với:
 
 ## Kiểm Tra Cài Đặt
 
-1. Truy cập: `http://localhost/duann1/home/index`
+1. Truy cập: `http://localhost/DuAn1/home/index`
 2. Nếu thấy trang chủ, cài đặt thành công!
-3. Thử đăng nhập admin: `http://localhost/duann1/auth/login`
+3. Thử đăng nhập admin: `http://localhost/DuAn1/auth/login`
 
 ## Xử Lý Lỗi Thường Gặp
 
@@ -98,7 +98,7 @@ Sau khi import database, bạn có thể đăng nhập với:
 ## Cấu Trúc Thư Mục
 
 ```
-duann1/
+DuAn1/
 ├── config/              # Cấu hình
 │   ├── config.php       # Cấu hình chung
 │   └── database.php     # Cấu hình database

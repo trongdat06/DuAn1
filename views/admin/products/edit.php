@@ -49,6 +49,44 @@ require_once dirname(dirname(__DIR__)) . "/admin/layouts/header.php";
             </div>
         </div>
         
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Ảnh Sản Phẩm</h5>
+            </div>
+            <div class="card-body">
+                <?php 
+                    $imgPath = __DIR__ . '/../../../public/data/' . rawurlencode($product['product_name']) . '.jpg';
+                    $imgUrl = BASE_URL . "public/data/" . rawurlencode($product['product_name']) . ".jpg";
+                    $imgExists = file_exists($imgPath);
+                ?>
+                <div class="text-center mb-3">
+                    <?php if ($imgExists): ?>
+                        <img src="<?= $imgUrl ?>" alt="<?= htmlspecialchars($product['product_name']) ?>" 
+                             class="img-fluid border rounded" style="max-height: 300px;">
+                    <?php else: ?>
+                        <div class="border rounded p-5 bg-light">
+                            <i class="bi bi-image" style="font-size: 4rem; color: #ccc;"></i>
+                            <p class="text-muted mt-2">Chưa có ảnh sản phẩm</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <form method="POST" action="<?= BASE_URL ?>admin/productUploadImage/<?= $product['product_id'] ?>" 
+                      enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="product_image" class="form-label">Upload Ảnh Mới</label>
+                        <input type="file" class="form-control" id="product_image" name="product_image" 
+                               accept="image/jpeg,image/jpg,image/png" required>
+                        <small class="text-muted">
+                            Tên file sẽ tự động là: <code><?= htmlspecialchars($product['product_name']) ?>.jpg</code>
+                        </small>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload me-2"></i> Upload Ảnh
+                    </button>
+                </form>
+            </div>
+        </div>
+        
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Biến Thể Sản Phẩm</h5>
