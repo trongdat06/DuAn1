@@ -26,21 +26,7 @@
                         <label for="address" class="form-label">Địa Chỉ *</label>
                         <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="gender" class="form-label">Giới Tính</label>
-                            <select class="form-select" id="gender" name="gender">
-                                <option value="">Chọn giới tính</option>
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="date_of_birth" class="form-label">Ngày Sinh</label>
-                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
-                        </div>
-                    </div>
+                    
                     <div class="mb-3">
                         <label for="payment_method" class="form-label">Phương Thức Thanh Toán *</label>
                         <select class="form-select" id="payment_method" name="payment_method" required>
