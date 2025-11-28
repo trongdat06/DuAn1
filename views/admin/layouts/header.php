@@ -9,51 +9,81 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/admin.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="<?= BASE_URL ?>admin/dashboard">
-                <i class="bi bi-speedometer2"></i> Admin Panel
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="sidebar-brand" href="<?= BASE_URL ?>admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span class="brand-text">Admin Panel</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/products">
+                    <i class="bi bi-box"></i>
+                    <span>Sản Phẩm</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/categories">
+                    <i class="bi bi-tag"></i>
+                    <span>Danh Mục</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/customers">
+                    <i class="bi bi-people"></i>
+                    <span>Khách Hàng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/orders">
+                    <i class="bi bi-receipt"></i>
+                    <span>Đơn Hàng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/reviews">
+                    <i class="bi bi-star"></i>
+                    <span>Đánh Giá</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <a class="nav-link" href="<?= BASE_URL ?>home/index">
+                <i class="bi bi-house"></i>
+                <span>Trang Chủ</span>
+            </a>
+            <a class="nav-link" href="<?= BASE_URL ?>auth/logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Đăng Xuất</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Bar -->
+    <nav class="topbar navbar-dark bg-dark">
+        <div class="topbar-left">
+            <button class="btn btn-toggle" id="sidebarToggle">
+                <i class="bi bi-list"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>admin/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>admin/products">Sản Phẩm</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>admin/categories">Danh Mục</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>admin/customers">Khách Hàng</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>admin/orders">Đơn Hàng</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>admin/reviews">Đánh Giá</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <span class="navbar-text me-3">Xin chào, <?= htmlspecialchars($_SESSION['admin_name']) ?></span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>home/index">Về Trang Chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASE_URL ?>auth/logout">Đăng Xuất</a>
-                    </li>
-                </ul>
+        </div>
+        <div class="topbar-right">
+            <div class="user-info-top">
+                <i class="bi bi-person-circle"></i>
+                <span><?= htmlspecialchars($_SESSION['admin_name']) ?></span>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid mt-4">
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
         <?php if (isset($_SESSION['success'])): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?= $_SESSION['success'] ?>

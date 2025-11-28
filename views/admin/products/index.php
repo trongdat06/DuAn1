@@ -2,7 +2,12 @@
 require_once dirname(dirname(__DIR__)) . "/admin/layouts/header.php";
 ?>
 
-<h2 class="mb-4">Quản Lý Sản Phẩm</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-4">Quản Lý Sản Phẩm</h2>
+    <span class="badge bg-primary fs-6">
+        Tổng: <?= count($products) ?> sản phẩm
+    </span>
+</div>
 
 <div class="mb-3">
     <a href="<?= BASE_URL ?>admin/productCreate" class="btn btn-primary">
