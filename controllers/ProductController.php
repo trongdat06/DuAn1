@@ -15,7 +15,7 @@ class ProductController extends BaseController {
     
     public function index() {
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-        $limit = 12;
+        $limit = 9;
         $offset = ($page - 1) * $limit;
         
         // Get filters
