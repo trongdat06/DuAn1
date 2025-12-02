@@ -24,6 +24,11 @@ function formatCurrency(amount) {
 
 // Add to cart with AJAX
 function addToCart(variantId, quantity) {
+    // Lưu vào localStorage ngay lập tức
+    if (typeof CartStorage !== 'undefined') {
+        CartStorage.addItem(variantId, quantity || 1);
+    }
+    
     $.ajax({
         url: BASE_URL + 'cart/add',
         method: 'POST',
@@ -36,12 +41,43 @@ function addToCart(variantId, quantity) {
         success: function(response) {
             if (response.success) {
                 $('#cart-count').text(response.cartCount);
-                alert(response.message);
+                
+                // Cập nhật localStorage từ response
+                if (typeof CartStorage !== 'undefined' && response.cart) {
+                    CartStorage.save(response.cart);
+                }
+                
+                // Hiển thị thông báo
+                var alertHtml = '<div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999; min-width: 300px;" role="alert">' +
+                    response.message +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                    '</div>';
+                $('body').append(alertHtml);
+                setTimeout(function() {
+                    $('.alert').fadeOut(function() {
+                        $(this).remove();
+                    });
+                }, 3000);
             } else {
-                alert(response.message);
+                // Xóa khỏi localStorage nếu thất bại
+                if (typeof CartStorage !== 'undefined') {
+                    CartStorage.removeItem(variantId);
+                }
+                
+                if (response.requireLogin) {
+                    if (confirm(response.message + '\n\nBạn có muốn chuyển đến trang đăng nhập?')) {
+                        window.location.href = response.loginUrl;
+                    }
+                } else {
+                    alert(response.message);
+                }
             }
         },
         error: function() {
+            // Xóa khỏi localStorage nếu có lỗi
+            if (typeof CartStorage !== 'undefined') {
+                CartStorage.removeItem(variantId);
+            }
             alert('Có lỗi xảy ra khi thêm vào giỏ hàng');
         }
     });

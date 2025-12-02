@@ -152,9 +152,10 @@
     transition: all 0.3s ease;
     border: none;
     margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .filter-card:hover {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12) !important;
 }
 .filter-section {
     border-bottom: 1px solid #e9ecef;
@@ -165,31 +166,24 @@
     border-bottom: none;
     margin-bottom: 0;
 }
-.price-range-input {
-    width: 100%;
-}
 .sort-view-bar {
     background: white;
-    padding: 15px;
+    padding: 15px 20px;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     margin-bottom: 20px;
 }
-.view-toggle-btn {
-    border: 1px solid #dee2e6;
-    background: white;
-    color: #6c757d;
-    transition: all 0.3s;
+.active-filters {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
 }
-.view-toggle-btn.active {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-}
-.view-toggle-btn:hover {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
+.active-filters .badge {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    margin: 3px;
 }
 .product-card {
     animation: fadeInUp 0.5s ease forwards;
@@ -205,27 +199,52 @@
         transform: translateY(0);
     }
 }
-.product-card:nth-child(1) { animation-delay: 0.1s; }
-.product-card:nth-child(2) { animation-delay: 0.2s; }
-.product-card:nth-child(3) { animation-delay: 0.3s; }
-.product-card:nth-child(4) { animation-delay: 0.4s; }
-.product-card:nth-child(5) { animation-delay: 0.5s; }
-.product-card:nth-child(6) { animation-delay: 0.6s; }
+.product-card:nth-child(1) { animation-delay: 0.05s; }
+.product-card:nth-child(2) { animation-delay: 0.1s; }
+.product-card:nth-child(3) { animation-delay: 0.15s; }
+.product-card:nth-child(4) { animation-delay: 0.2s; }
+.product-card:nth-child(5) { animation-delay: 0.25s; }
+.product-card:nth-child(6) { animation-delay: 0.3s; }
+.product-card:nth-child(7) { animation-delay: 0.35s; }
+.product-card:nth-child(8) { animation-delay: 0.4s; }
+.product-card:nth-child(9) { animation-delay: 0.45s; }
 .list-group-item {
     transition: all 0.3s ease;
     border: none;
     border-left: 3px solid transparent;
+    padding: 12px 15px;
 }
 .list-group-item:hover {
     background: #f8f9fa;
-    border-left-color: #0d6efd;
+    border-left-color: #dc3545;
     padding-left: 20px;
 }
 .list-group-item.active {
-    background: #e7f1ff;
-    border-left-color: #0d6efd;
-    color: #0d6efd;
+    background: #fff5f5;
+    border-left-color: #dc3545;
+    color: #dc3545;
     font-weight: 600;
+}
+.brand-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 3px;
+    border-radius: 5px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+.brand-badge:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.brand-badge.active {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
 }
 </style>
 
@@ -310,7 +329,7 @@
             <form method="GET" action="<?= BASE_URL ?>product/index" id="filterForm">
                 <!-- Categories -->
                 <div class="card shadow-sm filter-card border-0">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-danger text-white">
                         <h5 class="mb-0 fw-bold"><i class="bi bi-list-ul me-2"></i> Danh Mục</h5>
                     </div>
                     <div class="list-group list-group-flush">
@@ -334,14 +353,20 @@
                         <h5 class="mb-0 fw-bold"><i class="bi bi-tag me-2"></i> Thương Hiệu</h5>
                     </div>
                     <div class="card-body">
-                        <select name="brand" class="form-select" onchange="document.getElementById('filterForm').submit()">
-                            <option value="">Tất cả thương hiệu</option>
+                        <div class="mb-2">
+                            <a href="<?= BASE_URL ?>product/index<?= !empty($_GET) ? '?' . http_build_query(array_diff_key($_GET, ['brand' => ''], ['page' => ''])) : '' ?>" 
+                               class="brand-badge <?= empty($filters['brand']) ? 'active' : '' ?>">
+                                Tất cả
+                            </a>
+                        </div>
+                        <div class="d-flex flex-wrap">
                             <?php foreach ($brands as $brand): ?>
-                                <option value="<?= htmlspecialchars($brand) ?>" <?= (isset($filters['brand']) && $filters['brand'] == $brand) ? 'selected' : '' ?>>
+                                <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_merge($_GET, ['brand' => $brand, 'page' => 1])) ?>" 
+                                   class="brand-badge <?= (isset($filters['brand']) && $filters['brand'] == $brand) ? 'active' : '' ?>">
                                     <?= htmlspecialchars($brand) ?>
-                                </option>
+                                </a>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -354,19 +379,19 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label small">Từ:</label>
+                            <label class="form-label small fw-bold">Từ:</label>
                             <input type="number" name="min_price" class="form-control form-control-sm" 
                                    placeholder="0" value="<?= $filters['min_price'] ?? '' ?>"
                                    min="0" max="<?= $priceRange['max_price'] ?>">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small">Đến:</label>
+                            <label class="form-label small fw-bold">Đến:</label>
                             <input type="number" name="max_price" class="form-control form-control-sm" 
                                    placeholder="<?= number_format($priceRange['max_price'], 0, ',', '.') ?>"
                                    value="<?= $filters['max_price'] ?? '' ?>"
                                    min="0" max="<?= $priceRange['max_price'] ?>">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <button type="submit" class="btn btn-danger btn-sm w-100">
                             <i class="bi bi-funnel me-1"></i> Áp Dụng
                         </button>
                     </div>
@@ -397,7 +422,7 @@
                             <div class="input-group">
                                 <input type="text" name="keyword" class="form-control form-control-sm" 
                                        placeholder="Tên sản phẩm..." value="<?= htmlspecialchars($_GET['keyword'] ?? '') ?>">
-                                <button class="btn btn-primary btn-sm" type="submit">
+                                <button class="btn btn-danger btn-sm" type="submit">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -407,7 +432,7 @@
 
                 <!-- Clear Filters -->
                 <?php if (!empty($filters)): ?>
-                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-secondary w-100">
+                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-danger w-100">
                     <i class="bi bi-x-circle me-1"></i> Xóa Bộ Lọc
                 </a>
                 <?php endif; ?>
@@ -416,12 +441,68 @@
 
         <!-- Products -->
         <div class="col-lg-9 col-md-8">
+            <!-- Active Filters -->
+            <?php if (!empty($filters)): ?>
+            <div class="active-filters">
+                <div class="d-flex align-items-center flex-wrap">
+                    <strong class="me-2"><i class="bi bi-funnel me-1"></i> Bộ lọc đang áp dụng:</strong>
+                    <?php if (!empty($filters['category_id'])): ?>
+                        <?php 
+                            $categoryName = '';
+                            foreach ($categories as $cat) {
+                                if ($cat['category_id'] == $filters['category_id']) {
+                                    $categoryName = $cat['category_name'];
+                                    break;
+                                }
+                            }
+                        ?>
+                        <span class="badge bg-primary">
+                            Danh mục: <?= htmlspecialchars($categoryName) ?>
+                            <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_diff_key($_GET, ['category_id' => ''])) ?>" class="text-white ms-1">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($filters['brand'])): ?>
+                        <span class="badge bg-primary">
+                            Thương hiệu: <?= htmlspecialchars($filters['brand']) ?>
+                            <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_diff_key($_GET, ['brand' => ''])) ?>" class="text-white ms-1">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($filters['min_price']) || !empty($filters['max_price'])): ?>
+                        <span class="badge bg-primary">
+                            Giá: 
+                            <?php if (!empty($filters['min_price'])): ?>
+                                Từ <?= number_format($filters['min_price'], 0, ',', '.') ?>₫
+                            <?php endif; ?>
+                            <?php if (!empty($filters['max_price'])): ?>
+                                Đến <?= number_format($filters['max_price'], 0, ',', '.') ?>₫
+                            <?php endif; ?>
+                            <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_diff_key($_GET, ['min_price' => '', 'max_price' => ''])) ?>" class="text-white ms-1">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    <?php endif; ?>
+                    <?php if (!empty($filters['in_stock'])): ?>
+                        <span class="badge bg-success">
+                            Chỉ còn hàng
+                            <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_diff_key($_GET, ['in_stock' => ''])) ?>" class="text-white ms-1">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
             <!-- Sort and View Bar -->
             <div class="sort-view-bar">
                 <div class="row align-items-center">
                     <div class="col-md-6 mb-2 mb-md-0">
                         <div class="d-flex align-items-center">
-                            <span class="text-muted me-2 small">Sắp xếp:</span>
+                            <span class="text-muted me-2 small fw-bold">Sắp xếp:</span>
                             <select name="sort" class="form-select form-select-sm" style="max-width: 200px;" 
                                     onchange="var url = new URL(window.location.href); url.searchParams.set('sort', this.value); url.searchParams.set('page', '1'); window.location.href = url.toString();">
                                 <option value="newest" <?= ($sort == 'newest') ? 'selected' : '' ?>>Mới nhất</option>
@@ -434,7 +515,7 @@
                     </div>
                     <div class="col-md-6 text-md-end">
                         <span class="text-muted small">
-                            Hiển thị <strong><?= count($products) ?></strong> / <strong><?= $totalProducts ?></strong> sản phẩm
+                            Hiển thị <strong class="text-danger"><?= count($products) ?></strong> / <strong><?= $totalProducts ?></strong> sản phẩm
                         </span>
                     </div>
                 </div>
@@ -446,28 +527,36 @@
                     <i class="bi bi-inbox fs-1 d-block mb-3 text-info"></i>
                     <h4 class="fw-bold">Không tìm thấy sản phẩm</h4>
                     <p class="text-muted">Vui lòng thử lại với bộ lọc khác hoặc từ khóa khác.</p>
-                    <a href="<?= BASE_URL ?>product/index" class="btn btn-primary mt-3">
+                    <a href="<?= BASE_URL ?>product/index" class="btn btn-danger mt-3">
                         <i class="bi bi-arrow-left me-1"></i> Xem Tất Cả Sản Phẩm
                     </a>
                 </div>
             <?php else: ?>
                 <div class="row g-4" id="productsGrid" style="scroll-margin-top: 100px;">
-                    <?php foreach ($products as $index => $product): ?>
-                        <?php
-                        require_once __DIR__ . '/../../models/ProductModel.php';
-                        $productModel = new ProductModel();
+                    <?php 
+                    require_once __DIR__ . '/../../models/ProductModel.php';
+                    $productModel = new ProductModel();
+                    foreach ($products as $index => $product): 
                         $variants = $productModel->getProductVariants($product['product_id']);
                         if ($variants) {
                             $prices = array_column($variants, 'price');
                             $product['min_price'] = min($prices);
                             $product['max_price'] = max($prices);
+                            
+                            // Tính discount
+                            if (!isset($product['discount_percent'])) {
+                                $product['discount_percent'] = rand(5, 20);
+                            }
+                            if (!isset($product['old_price']) && $product['min_price'] > 0) {
+                                $product['old_price'] = round($product['min_price'] / (1 - $product['discount_percent'] / 100));
+                            }
                         } else {
                             $product['min_price'] = 0;
                             $product['max_price'] = 0;
                         }
-                        ?>
+                    ?>
                         <div class="col-lg-4 col-md-6 col-6">
-                            <?php include __DIR__ . '/product_card.php'; ?>
+                            <?php include __DIR__ . '/product_card_home.php'; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>

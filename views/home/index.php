@@ -1,125 +1,631 @@
-<div class="container mt-4">
-    
-    <div id="heroCarousel" class="carousel slide mb-5 shadow-sm rounded-3 overflow-hidden" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-        </div>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="<?= BASE_URL ?>public/images/banner1.jpg" class="d-block w-100" alt="Banner 1" style="height: 400px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-3 rounded">
-                    <h5>Ưu Đãi Lên Đến 50%</h5>
-                    <p>Chào mừng mùa tựu trường, giảm giá lớn cho các mẫu điện thoại mới nhất!</p>
-                    <a href="<?= BASE_URL ?>product/index" class="btn btn-warning btn-sm">Mua Ngay</a>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="<?= BASE_URL ?>public/images/banner2.jpg" class="d-block w-100" alt="Banner 2" style="height: 400px; object-fit: cover;">
-                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 p-3 rounded">
-                    <h5>Sản Phẩm Apple Chính Hãng</h5>
-                    <p>Nhận ngay bộ quà tặng trị giá 2.000.000đ khi mua iPhone 15 Pro Max.</p>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="<?= BASE_URL ?>public/images/banner3.jpg" class="d-block w-100" alt="Banner 3" style="height: 400px; object-fit: cover;">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
+<?php
+// Sử dụng dữ liệu từ controller
+$allProducts = $allProducts ?? [];
+require_once __DIR__ . '/../../models/ProductModel.php';
+$productModel = new ProductModel();
+?>
+
+<!-- Hero Banner Carousel -->
+<div id="homeHeroCarousel" class="carousel slide home-hero-carousel mb-0" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="2"></button>
     </div>
-    
-    <?php if (!empty($categories)): ?>
-    <h3 class="fw-bold mb-4 text-center text-primary">Danh Mục Nổi Bật</h3>
-    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3 mb-5 justify-content-center">
-        <?php foreach ($categories as $category): ?>
-        <div class="col">
-            <a href="<?= BASE_URL ?>product/category/<?= $category['category_id'] ?>" class="text-decoration-none text-dark d-block text-center category-card rounded shadow-sm overflow-hidden">
+    <div class="carousel-inner">
+        <!-- Slide 1: Sản Phẩm Mới -->
+        <div class="carousel-item active">
+            <div class="carousel-slide-wrapper" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 400px; position: relative; overflow: hidden;">
+                <div class="container h-100">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-lg-6 text-white py-5">
+                            <h1 class="display-4 fw-bold mb-3">Sản Phẩm Mới Nhất</h1>
+                            <p class="lead mb-4">Khám phá bộ sưu tập điện thoại và phụ kiện công nghệ cao với giá ưu đãi</p>
+                            <div class="d-flex gap-3">
+                                <a href="<?= BASE_URL ?>product/index?sort=newest" class="btn btn-light btn-lg px-4">
+                                    <i class="bi bi-arrow-right-circle me-2"></i> Xem Ngay
+                                </a>
+                                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-light btn-lg px-4">
+                                    <i class="bi bi-grid me-2"></i> Tất Cả Sản Phẩm
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <img src="<?= BASE_URL ?>public/images/banner1.jpg" alt="Sản phẩm mới" class="img-fluid rounded shadow-lg" style="max-height: 350px; object-fit: cover;" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2: Khuyến Mãi Hot -->
+        <div class="carousel-item">
+            <div class="carousel-slide-wrapper" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); min-height: 400px; position: relative; overflow: hidden;">
+                <div class="container h-100">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-lg-6 text-white py-5">
+                            <span class="badge bg-danger mb-3 px-3 py-2" style="font-size: 1rem;">KHUYẾN MÃI HOT</span>
+                            <h1 class="display-4 fw-bold mb-3">Giảm Giá Lên Đến 50%</h1>
+                            <p class="lead mb-4">Ưu đãi đặc biệt cho các sản phẩm bán chạy nhất. Nhanh tay đặt hàng ngay!</p>
+                            <div class="d-flex gap-3">
+                                <a href="<?= BASE_URL ?>product/index?sort=price_asc" class="btn btn-light btn-lg px-4">
+                                    <i class="bi bi-tag-fill me-2"></i> Mua Ngay
+                                </a>
+                                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-light btn-lg px-4">
+                                    <i class="bi bi-percent me-2"></i> Xem Ưu Đãi
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <img src="<?= BASE_URL ?>public/images/banner2.jpg" alt="Khuyến mãi" class="img-fluid rounded shadow-lg" style="max-height: 350px; object-fit: cover;" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: Thương Hiệu Nổi Bật -->
+        <div class="carousel-item">
+            <div class="carousel-slide-wrapper" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); min-height: 400px; position: relative; overflow: hidden;">
+                <div class="container h-100">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-lg-6 text-white py-5">
+                            <h1 class="display-4 fw-bold mb-3">Thương Hiệu Hàng Đầu</h1>
+                            <p class="lead mb-4">iPhone, Samsung, Xiaomi, OPPO và nhiều thương hiệu uy tín khác</p>
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                <span class="badge bg-white text-dark px-3 py-2">Apple</span>
+                                <span class="badge bg-white text-dark px-3 py-2">Samsung</span>
+                                <span class="badge bg-white text-dark px-3 py-2">Xiaomi</span>
+                                <span class="badge bg-white text-dark px-3 py-2">OPPO</span>
+                            </div>
+                            <a href="<?= BASE_URL ?>product/index" class="btn btn-light btn-lg px-4">
+                                <i class="bi bi-award-fill me-2"></i> Khám Phá Ngay
+                            </a>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <img src="<?= BASE_URL ?>public/images/banner3.jpg" alt="Thương hiệu" class="img-fluid rounded shadow-lg" style="max-height: 350px; object-fit: cover;" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeHeroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeHeroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<div class="container-fluid px-0">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs-section bg-white border-bottom sticky-top" style="z-index: 100;">
+        <div class="container">
+            <ul class="nav nav-tabs border-0" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a href="<?= BASE_URL ?>home/index?category_id=1" class="nav-link fw-bold text-uppercase <?= (!isset($filters['category_id']) || $filters['category_id'] == 1) ? 'active' : '' ?>" id="phone-tab">
+                        ĐIỆN THOẠI
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a href="<?= BASE_URL ?>home/index?category_id=2" class="nav-link fw-bold text-uppercase <?= (isset($filters['category_id']) && $filters['category_id'] == 2) ? 'active' : '' ?>" id="tablet-tab">
+                        MÁY TÍNH BẢNG
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Sub Categories and Brands -->
+    <div class="sub-nav-section bg-white border-bottom">
+        <div class="container">
+            <div class="tab-content">
                 <?php 
-                    // Tạo đường dẫn ảnh danh mục
-                    $categoryImageName = str_replace(' ', '_', strtolower($category['category_name']));
-                    $categoryImagePath = __DIR__ . '/../public/images/categories/' . $categoryImageName . '.jpg';
-                    $categoryImageUrl = BASE_URL . 'public/images/categories/' . $categoryImageName . '.jpg';
-                    $hasImage = file_exists($categoryImagePath);
+                $currentCategoryId = $filters['category_id'] ?? 1;
+                $isPhoneTab = ($currentCategoryId == 1);
+                $isTabletTab = ($currentCategoryId == 2);
                 ?>
-
-                <div class="p-3">
-                    <p class="mb-0 fw-bold small"><?= htmlspecialchars($category['category_name']) ?></p>
+                <div class="tab-pane fade <?= $isPhoneTab ? 'show active' : '' ?>" id="phone" role="tabpanel">
+                    <!-- Brands -->
+                    <div class="brands-scroll mb-3">
+                        <div class="d-flex gap-2 align-items-center overflow-x-auto py-2" style="scrollbar-width: none;">
+                            <?php 
+                            $currentBrand = $filters['brand'] ?? '';
+                            $brandsToShow = ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'TECNO', 'HONOR', 'Nubia', 'Sony', 'Nokia', 'Infinix'];
+                            if (!empty($brands)) {
+                                $brandsToShow = array_intersect($brandsToShow, $brands);
+                            }
+                            ?>
+                            <a href="<?= BASE_URL ?>home/index?category_id=1" class="brand-badge text-decoration-none px-3 py-1 rounded-pill border <?= empty($currentBrand) && $isPhoneTab ? 'active' : '' ?>">
+                                Tất cả
+                            </a>
+                            <?php foreach ($brandsToShow as $brand): ?>
+                                <a href="?category_id=1&brand=<?= urlencode($brand) ?>" 
+                                   class="brand-badge text-decoration-none px-3 py-1 rounded-pill border <?= ($currentBrand === $brand && $isPhoneTab) ? 'active' : '' ?>">
+                                    <?= htmlspecialchars($brand) ?>
+                                </a>
+                            <?php endforeach; ?>
+                            <a href="<?= BASE_URL ?>product/index?category_id=1" class="text-decoration-none text-primary ms-2 fw-bold">Xem tất cả</a>
+                        </div>
+                    </div>
                 </div>
-            </a>
+                
+                <div class="tab-pane fade <?= $isTabletTab ? 'show active' : '' ?>" id="tablet" role="tabpanel">
+                    <!-- Brands -->
+                    <div class="brands-scroll mb-3">
+                        <div class="d-flex gap-2 align-items-center overflow-x-auto py-2" style="scrollbar-width: none;">
+                            <?php 
+                            $currentBrand = $filters['brand'] ?? '';
+                            $brandsToShow = ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'TECNO', 'HONOR', 'Nubia', 'Sony', 'Nokia', 'Infinix'];
+                            if (!empty($brands)) {
+                                $brandsToShow = array_intersect($brandsToShow, $brands);
+                            }
+                            ?>
+                            <a href="<?= BASE_URL ?>home/index?category_id=2" class="brand-badge text-decoration-none px-3 py-1 rounded-pill border <?= empty($currentBrand) && $isTabletTab ? 'active' : '' ?>">
+                                Tất cả
+                            </a>
+                            <?php foreach ($brandsToShow as $brand): ?>
+                                <a href="?category_id=2&brand=<?= urlencode($brand) ?>" 
+                                   class="brand-badge text-decoration-none px-3 py-1 rounded-pill border <?= ($currentBrand === $brand && $isTabletTab) ? 'active' : '' ?>">
+                                    <?= htmlspecialchars($brand) ?>
+                                </a>
+                            <?php endforeach; ?>
+                            <a href="<?= BASE_URL ?>product/index?category_id=2" class="text-decoration-none text-primary ms-2 fw-bold">Xem tất cả</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <?php endforeach; ?>
     </div>
-    <?php endif; ?>
 
-    <h3 class="fw-bold mb-4 border-bottom pb-2"><i class="bi bi-star-fill text-warning me-2"></i> Sản Phẩm Nổi Bật</h3>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
-        <?php if (!empty($featuredProducts)): ?>
-            <?php foreach ($featuredProducts as $product): ?>
-                <div class="col">
-                    <?php 
-                        // Dòng fix lỗi: Include partial view và truyền biến $product vào
-                      include __DIR__ . '/../products/product_card.php';
-                    ?>
+    <!-- Main Content: Sidebar + Products Grid -->
+    <div class="container mt-4 mb-5">
+        <div class="row">
+            <!-- Left Sidebar - Promotional Banners -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="promo-sidebar" style="position: sticky; top: 200px;">
+                    <!-- Banner 1: Samsung Galaxy S25 Ultra -->
+                    <div class="promo-banner mb-4 bg-white border rounded overflow-hidden shadow-sm">
+                        <div class="position-relative samsung-banner" style="background: linear-gradient(180deg, #a78bfa 0%, #6b21a8 100%); padding: 25px 20px;">
+                            <h4 class="text-white fw-bold mb-2" style="font-size: 1.5rem; line-height: 1.2;">SAMSUNG Galaxy S25 Ultra</h4>
+                            <p class="text-white mb-3" style="font-size: 0.9rem; opacity: 0.95;">12GB 256GB</p>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="text-white fw-bold me-3" style="font-size: 1.8rem;">26.49 Triệu</span>
+                                <span class="badge bg-danger rounded-pill px-3 py-2" style="font-size: 0.85rem; font-weight: 600;">Giảm 2 Triệu</span>
+                            </div>
+                            <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    Miễn phí 6 tháng + Google AI Pro
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    S-Student | S-Teacher Giảm thêm 7% tối đa 700K
+                                </li>
+                            </ul>
+                            <a href="<?= BASE_URL ?>product/search?keyword=Samsung+Galaxy+S25" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 1rem; border-radius: 8px;">MUA NGAY</a>
+                        </div>
+                        <div class="text-center p-3 border-top" style="background: #fff; border-color: #e5e7eb !important;">
+                            <span class="text-dark fw-semibold" style="font-size: 0.95rem;">Galaxy S25</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Banner 2: OPPO Find X9 -->
+                    <div class="promo-banner bg-white border rounded overflow-hidden shadow-sm">
+                        <div class="p-4 oppo-banner" style="background: #ec4899; padding: 25px 20px;">
+                            <h5 class="text-white fw-bold mb-2" style="font-size: 1.3rem; line-height: 1.3;">OPPO AI Phone Find X9 Series</h5>
+                            <p class="text-white mb-3" style="font-size: 0.9rem; opacity: 0.95;">HASSELBLAD</p>
+                            <div class="mb-3">
+                                <p class="text-white mb-2" style="font-size: 1rem;">
+                                    Giá chỉ từ: <strong style="font-size: 1.2rem;">22.990.000₫</strong>
+                                </p>
+                                <p class="text-white" style="font-size: 0.95rem; opacity: 0.95;">
+                                    Bộ Quà Tặng Trị Giá 10.000.000₫
+                                </p>
+                            </div>
+                            <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 1.8;">
+                                <li class="mb-1">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    Premium Service
+                                </li>
+                                <li class="mb-1">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    Bảo Hành 24 Tháng
+                                </li>
+                                <li class="mb-1">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    Bảo Hiểm Màn Hình 12 Tháng
+                                </li>
+                                <li class="mb-1">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    Bảo Hành Tận Nơi
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    Toàn Cầu
+                                </li>
+                            </ul>
+                            <a href="<?= BASE_URL ?>product/search?keyword=OPPO+Find+X9" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
+                        </div>
+                    </div>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12"><div class="alert alert-warning">Chưa có sản phẩm nổi bật nào.</div></div>
-        <?php endif; ?>
-    </div>
-
-    <h3 class="fw-bold mb-4 border-bottom pb-2"><i class="bi bi-fire text-danger me-2"></i> Sản Phẩm Bán Chạy</h3>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
-        <?php if (!empty($bestSellingProducts)): ?>
-            <?php foreach ($bestSellingProducts as $product): ?>
-                <div class="col">
-                    <?php 
-                        // Include partial view và truyền biến $product vào
-                        include __DIR__ . '/../products/product_card.php';
-                    ?>
+            </div>
+            
+            <!-- Right: Products Grid -->
+            <div class="col-lg-9">
+                <?php if (!empty($filters['brand']) || (isset($filters['category_id']) && $filters['category_id'] == 2)): ?>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <?php if (isset($filters['category_id']) && $filters['category_id'] == 2): ?>
+                                    <span class="badge bg-info me-2">MÁY TÍNH BẢNG</span>
+                                <?php endif; ?>
+                                <?php if (!empty($filters['brand'])): ?>
+                                    <span class="badge bg-danger me-2"><?= htmlspecialchars($filters['brand']) ?></span>
+                                <?php endif; ?>
+                                <span class="text-muted small"><?= $totalProducts ?> sản phẩm</span>
+                            </h5>
+                            <a href="<?= BASE_URL ?>home/index?category_id=<?= $currentCategoryId ?>" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Xóa bộ lọc
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="row g-3" id="productsGrid">
+                    <?php if (!empty($allProducts)): ?>
+                        <?php foreach ($allProducts as $product): ?>
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <?php 
+                                    // Đảm bảo có đủ dữ liệu
+                                    if (!isset($product['min_price']) || $product['min_price'] == 0) {
+                                        $variants = $productModel->getProductVariants($product['product_id']);
+                                        if ($variants) {
+                                            $prices = array_column($variants, 'price');
+                                            $product['min_price'] = min($prices);
+                                            $product['max_price'] = max($prices);
+                                            
+                                            if (!isset($product['discount_percent'])) {
+                                                $product['discount_percent'] = rand(5, 15);
+                                            }
+                                            if (!isset($product['old_price']) && $product['min_price'] > 0) {
+                                                $product['old_price'] = round($product['min_price'] / (1 - $product['discount_percent'] / 100));
+                                            }
+                                        }
+                                    }
+                                    
+                                    include __DIR__ . '/../products/product_card_home.php';
+                                ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                                <h4 class="mt-3 mb-2">Không tìm thấy sản phẩm</h4>
+                                <p class="text-muted mb-4">Hãy thử tìm kiếm với bộ lọc khác hoặc xem tất cả sản phẩm</p>
+                                <a href="<?= BASE_URL ?>home/index" class="btn btn-primary me-2">
+                                    <i class="bi bi-arrow-left"></i> Về trang chủ
+                                </a>
+                                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-primary">
+                                    <i class="bi bi-grid"></i> Xem tất cả sản phẩm
+                                </a>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12"><div class="alert alert-warning">Chưa có sản phẩm bán chạy nào.</div></div>
-        <?php endif; ?>
+                
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <?php
+                            $startPage = max(1, $page - 2);
+                            $endPage = min($totalPages, $page + 2);
+                            
+                            if ($startPage > 1): ?>
+                                <li class="page-item"><a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>">1</a></li>
+                                <?php if ($startPage > 2): ?>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                    <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <?php if ($endPage < $totalPages): ?>
+                                <?php if ($endPage < $totalPages - 1): ?>
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <?php endif; ?>
+                                <li class="page-item"><a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $totalPages])) ?>"><?= $totalPages ?></a></li>
+                            <?php endif; ?>
+                            
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
-
 </div>
 
 <style>
-.category-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #eee;
-    background: #fff;
-    display: block;
+/* Hero Banner Carousel */
+.home-hero-carousel {
+    margin-bottom: 0;
 }
-.category-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    text-decoration: none;
+
+.home-hero-carousel .carousel-item {
+    min-height: 400px;
 }
-.category-image-wrapper {
-    transition: transform 0.3s ease;
+
+.carousel-slide-wrapper {
     position: relative;
-    overflow: hidden;
 }
 
-.category-image {
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.carousel-slide-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 1;
 }
 
-.category-card:hover .category-image-wrapper {
-    transform: scale(1.05);
+.carousel-slide-wrapper .container {
+    position: relative;
+    z-index: 2;
 }
 
-.category-card:hover .category-image {
-    transform: scale(1.15);
+.home-hero-carousel .carousel-control-prev,
+.home-hero-carousel .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+    transition: all 0.3s;
 }
+
+.home-hero-carousel .carousel-control-prev {
+    left: 20px;
+}
+
+.home-hero-carousel .carousel-control-next {
+    right: 20px;
+}
+
+.home-hero-carousel .carousel-control-prev:hover,
+.home-hero-carousel .carousel-control-next:hover {
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+}
+
+.home-hero-carousel .carousel-indicators {
+    bottom: 20px;
+}
+
+.home-hero-carousel .carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    margin: 0 5px;
+}
+
+.home-hero-carousel .carousel-indicators button.active {
+    background: #fff;
+    border-color: #fff;
+}
+
+.nav-tabs .nav-link {
+    color: #333;
+    border: none;
+    padding: 15px 20px;
+    position: relative;
+}
+
+.nav-tabs .nav-link.active {
+    color: #dc3545;
+    background: transparent;
+    border-bottom: 3px solid #dc3545;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #dc3545;
+    border-color: transparent;
+}
+
+.brands-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.brand-badge {
+    transition: all 0.3s;
+    white-space: nowrap;
+    color: #333;
+}
+
+.brand-badge:hover {
+    background: #dc3545;
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
+.brand-badge.active {
+    background: #dc3545;
+    color: white !important;
+    border-color: #dc3545 !important;
+}
+
+.promo-banner {
+    transition: transform 0.3s;
+}
+
+.promo-banner:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.samsung-banner {
+    background: linear-gradient(180deg, #a78bfa 0%, #6b21a8 100%) !important;
+}
+
+.oppo-banner {
+    background: #ec4899 !important;
+}
+
+.promo-banner .btn-danger {
+    background: #dc3545;
+    border: none;
+    transition: all 0.3s;
+}
+
+.promo-banner .btn-danger:hover {
+    background: #c82333;
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.promo-sidebar {
+    position: sticky;
+    top: 200px;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+}
+
+@media (max-width: 991px) {
+    .promo-sidebar {
+        position: relative;
+        top: 0;
+        max-height: none;
+    }
+    
+    .home-hero-carousel .carousel-item {
+        min-height: 350px;
+    }
+    
+    .home-hero-carousel .display-4 {
+        font-size: 2rem !important;
+    }
+    
+    .home-hero-carousel .lead {
+        font-size: 1rem;
+    }
+    
+    .home-hero-carousel .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .home-hero-carousel .col-lg-6:last-child {
+        display: none;
+    }
+}
+
+/* Animation for product cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.product-card-home {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Loading state */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+
+.loading-overlay.active {
+    display: flex;
+    }
 </style>
+
+<script>
+// Smooth scroll và loading state
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý filter brand với loading
+    document.querySelectorAll('.brand-badge').forEach(function(badge) {
+        badge.addEventListener('click', function(e) {
+            if (!this.classList.contains('active')) {
+                // Show loading
+                const loading = document.createElement('div');
+                loading.className = 'loading-overlay active';
+                loading.innerHTML = '<div class="spinner-border text-danger" role="status"><span class="visually-hidden">Loading...</span></div>';
+                document.body.appendChild(loading);
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Lazy load images
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        });
+        
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+});
+</script>

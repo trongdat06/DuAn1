@@ -8,7 +8,7 @@
                     <div class="col-lg-3 col-md-6 mb-4">
                         <div class="footer-widget">
                             <h5 class="footer-title mb-4">
-                                <span class="text-warning">MIVON</span><span class="text-white">STORE</span>
+                                <span class="text-danger">MIVON</span><span class="text-white">STORE</span>
                             </h5>
                             <p class="footer-text mb-4">
                                 Chuyên bán điện thoại và phụ kiện điện tử chính hãng, uy tín hàng đầu Việt Nam. 
@@ -62,11 +62,11 @@
                         <div class="footer-widget">
                             <h6 class="footer-heading mb-4">Sản Phẩm</h6>
                             <ul class="footer-links">
-                                <li><a href="<?= BASE_URL ?>product/search?keyword=iPhone"><i class="bi bi-phone me-2"></i>iPhone</a></li>
-                                <li><a href="<?= BASE_URL ?>product/search?keyword=Samsung"><i class="bi bi-phone me-2"></i>Samsung</a></li>
-                                <li><a href="<?= BASE_URL ?>product/search?keyword=Xiaomi"><i class="bi bi-phone me-2"></i>Xiaomi</a></li>
-                                <li><a href="<?= BASE_URL ?>product/search?keyword=OPPO"><i class="bi bi-phone me-2"></i>OPPO</a></li>
-                                <li><a href="<?= BASE_URL ?>product/search?keyword=Vivo"><i class="bi bi-phone me-2"></i>Vivo</a></li>
+                                <li><a href="<?= BASE_URL ?>product/index?brand=Apple"><i class="bi bi-phone me-2"></i>iPhone</a></li>
+                                <li><a href="<?= BASE_URL ?>product/index?brand=Samsung"><i class="bi bi-phone me-2"></i>Samsung</a></li>
+                                <li><a href="<?= BASE_URL ?>product/index?brand=Xiaomi"><i class="bi bi-phone me-2"></i>Xiaomi</a></li>
+                                <li><a href="<?= BASE_URL ?>product/index?brand=OPPO"><i class="bi bi-phone me-2"></i>OPPO</a></li>
+                                <li><a href="<?= BASE_URL ?>product/index?brand=Vivo"><i class="bi bi-phone me-2"></i>Vivo</a></li>
                                 <li><a href="<?= BASE_URL ?>product/index"><i class="bi bi-grid me-2"></i>Tất Cả Sản Phẩm</a></li>
                             </ul>
                         </div>
@@ -183,9 +183,10 @@
         height: 100%;
     }
     .footer-title {
-        font-size: 1.5rem;
-        font-weight: 700;
+        font-size: 1.8rem;
+        font-weight: 800;
         margin-bottom: 1rem;
+        letter-spacing: -1px;
     }
     .footer-text {
         color: #b0b0b0;
@@ -205,8 +206,9 @@
         bottom: 0;
         left: 0;
         width: 40px;
-        height: 2px;
-        background: linear-gradient(90deg, #ffc107, #ff9800);
+        height: 3px;
+        background: linear-gradient(90deg, #dc3545, #ffc107);
+        border-radius: 2px;
     }
     .footer-links {
         list-style: none;
@@ -224,7 +226,7 @@
         display: inline-block;
     }
     .footer-links a:hover {
-        color: #ffc107;
+        color: #dc3545;
         transform: translateX(5px);
         text-decoration: none;
     }
@@ -238,8 +240,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.1);
         color: #fff;
@@ -251,6 +253,7 @@
         transform: translateY(-5px);
         color: #fff;
         text-decoration: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
     .social-link.facebook:hover {
         background: #1877f2;
@@ -276,15 +279,16 @@
         margin-bottom: 15px;
     }
     .contact-icon {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 193, 7, 0.1);
+        background: rgba(220, 53, 69, 0.15);
         border-radius: 50%;
-        color: #ffc107;
+        color: #dc3545;
         flex-shrink: 0;
+        font-size: 1.1rem;
     }
     .footer-contact strong {
         color: #fff;
@@ -298,7 +302,7 @@
         transition: color 0.3s ease;
     }
     .footer-contact a:hover {
-        color: #ffc107;
+        color: #dc3545;
     }
     .footer-bottom {
         background: rgba(0, 0, 0, 0.3);
@@ -314,7 +318,7 @@
         cursor: pointer;
     }
     .payment-methods i:hover {
-        color: #ffc107;
+        color: #dc3545;
         transform: scale(1.2);
     }
     @media (max-width: 768px) {
@@ -322,7 +326,7 @@
             margin-bottom: 30px;
         }
         .footer-title {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
         }
     }
     </style>
@@ -332,6 +336,7 @@
     <script>
         var BASE_URL = '<?= BASE_URL ?>';
     </script>
+    <script src="<?= BASE_URL ?>public/js/cart-storage.js"></script>
     <script src="<?= BASE_URL ?>public/js/main.js"></script>
 </body>
 </html>

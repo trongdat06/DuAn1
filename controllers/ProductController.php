@@ -120,13 +120,75 @@ class ProductController extends BaseController {
             $this->redirect('product/index');
         }
         
-        $products = $this->productModel->searchProducts($keyword);
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 12;
+        $offset = ($page - 1) * $limit;
+        
+        // Get filters
+        $filters = [];
+        if (!empty($_GET['category_id'])) {
+            $filters['category_id'] = (int)$_GET['category_id'];
+        }
+        if (!empty($_GET['brand'])) {
+            $filters['brand'] = $_GET['brand'];
+        }
+        if (!empty($_GET['min_price'])) {
+            $filters['min_price'] = (int)$_GET['min_price'];
+        }
+        if (!empty($_GET['max_price'])) {
+            $filters['max_price'] = (int)$_GET['max_price'];
+        }
+        if (isset($_GET['in_stock']) && $_GET['in_stock'] == '1') {
+            $filters['in_stock'] = true;
+        }
+        
+        // Get sort
+        $sort = $_GET['sort'] ?? 'newest';
+        $allowedSorts = ['newest', 'price_asc', 'price_desc', 'name_asc', 'name_desc'];
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'newest';
+        }
+        
+        // Get products
+        $products = $this->productModel->searchProducts($keyword, $limit, $offset, $filters, $sort);
+        $totalProducts = $this->productModel->searchProductsCount($keyword, $filters);
+        $totalPages = ceil($totalProducts / $limit);
+        
+        // Get filter options
         $categories = $this->productModel->getAllCategories();
+        $brands = $this->productModel->getAllBrands();
+        $priceRange = $this->productModel->getPriceRange();
+        
+        // Process products to add min_price, max_price, discount_percent, old_price
+        foreach ($products as &$product) {
+            if (!isset($product['min_price']) || $product['min_price'] == 0) {
+                $variants = $this->productModel->getProductVariants($product['product_id']);
+                if ($variants) {
+                    $prices = array_column($variants, 'price');
+                    $product['min_price'] = min($prices);
+                    $product['max_price'] = max($prices);
+                }
+            }
+            
+            if (!isset($product['discount_percent'])) {
+                $product['discount_percent'] = rand(5, 15);
+            }
+            if (!isset($product['old_price']) && $product['min_price'] > 0) {
+                $product['old_price'] = round($product['min_price'] / (1 - $product['discount_percent'] / 100));
+            }
+        }
         
         $data = [
             'products' => $products,
             'categories' => $categories,
+            'brands' => $brands,
+            'priceRange' => $priceRange,
+            'filters' => $filters,
+            'sort' => $sort,
             'keyword' => $keyword,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalProducts' => $totalProducts,
             'pageTitle' => 'Tìm kiếm: ' . $keyword
         ];
         

@@ -70,7 +70,8 @@ class CartController extends BaseController {
                         $this->jsonResponse([
                             'success' => true,
                             'message' => 'Đã thêm vào giỏ hàng',
-                            'cartCount' => $this->cartModel->getCartCount()
+                            'cartCount' => $this->cartModel->getCartCount(),
+                            'cart' => isset($_SESSION['cart']) ? $_SESSION['cart'] : []
                         ]);
                     } else {
                         $_SESSION['success'] = 'Đã thêm vào giỏ hàng';
@@ -104,7 +105,8 @@ class CartController extends BaseController {
                             'success' => true,
                             'message' => 'Đã cập nhật giỏ hàng',
                             'cartCount' => $this->cartModel->getCartCount(),
-                            'cartTotal' => $this->cartModel->getCartTotal()
+                            'cartTotal' => $this->cartModel->getCartTotal(),
+                            'cart' => isset($_SESSION['cart']) ? $_SESSION['cart'] : []
                         ]);
                         return;
                     }
@@ -144,6 +146,16 @@ class CartController extends BaseController {
             
             if ($removedCount > 0) {
                 $_SESSION['success'] = 'Đã xóa ' . $removedCount . ' sản phẩm khỏi giỏ hàng';
+                
+                if (isset($_POST['ajax'])) {
+                    $this->jsonResponse([
+                        'success' => true,
+                        'message' => 'Đã xóa ' . $removedCount . ' sản phẩm khỏi giỏ hàng',
+                        'cartCount' => $this->cartModel->getCartCount(),
+                        'cart' => isset($_SESSION['cart']) ? $_SESSION['cart'] : []
+                    ]);
+                    return;
+                }
             } else {
                 $_SESSION['error'] = 'Không thể xóa sản phẩm';
             }
@@ -244,6 +256,96 @@ class CartController extends BaseController {
         ];
         
         $this->view('cart/order_success', $data);
+    }
+    
+    // Lấy giỏ hàng hiện tại (để sync với localStorage)
+    public function getCart() {
+        if (!isset($_SESSION['customer_id'])) {
+            $this->jsonResponse([
+                'success' => false,
+                'message' => 'Chưa đăng nhập'
+            ], 401);
+            return;
+        }
+        
+        $cart = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
+        $this->jsonResponse([
+            'success' => true,
+            'cart' => $cart,
+            'cartCount' => $this->cartModel->getCartCount()
+        ]);
+    }
+    
+    // Đồng bộ giỏ hàng từ localStorage lên session
+    public function syncCart() {
+        if (!isset($_SESSION['customer_id'])) {
+            $this->jsonResponse([
+                'success' => false,
+                'message' => 'Chưa đăng nhập'
+            ], 401);
+            return;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart'])) {
+            $cartData = json_decode($_POST['cart'], true);
+            
+            if (is_array($cartData)) {
+                // Validate và merge với cart hiện tại
+                $validCart = [];
+                foreach ($cartData as $variantId => $quantity) {
+                    $variantId = (int)$variantId;
+                    $quantity = (int)$quantity;
+                    
+                    if ($variantId > 0 && $quantity > 0) {
+                        // Kiểm tra tồn kho
+                        $sql = "SELECT stock_quantity FROM Product_Variants WHERE variant_id = :variant_id";
+                        $stmt = $this->cartModel->conn->prepare($sql);
+                        $stmt->bindParam(':variant_id', $variantId);
+                        $stmt->execute();
+                        $variant = $stmt->fetch();
+                        
+                        if ($variant && $variant['stock_quantity'] >= $quantity) {
+                            $validCart[$variantId] = $quantity;
+                        } else if ($variant && $variant['stock_quantity'] > 0) {
+                            // Điều chỉnh số lượng nếu vượt quá tồn kho
+                            $validCart[$variantId] = $variant['stock_quantity'];
+                        }
+                    }
+                }
+                
+                // Merge với cart hiện tại (ưu tiên số lượng lớn hơn)
+                if (!isset($_SESSION['cart'])) {
+                    $_SESSION['cart'] = [];
+                }
+                
+                foreach ($validCart as $variantId => $quantity) {
+                    if (!isset($_SESSION['cart'][$variantId]) || $_SESSION['cart'][$variantId] < $quantity) {
+                        $_SESSION['cart'][$variantId] = $quantity;
+                    }
+                }
+                
+                // Xóa các sản phẩm không còn trong localStorage
+                foreach ($_SESSION['cart'] as $variantId => $quantity) {
+                    if (!isset($validCart[$variantId])) {
+                        // Giữ lại trong session nếu đang ở trang cart
+                        // Chỉ xóa nếu không có trong localStorage
+                    }
+                }
+                
+                $this->jsonResponse([
+                    'success' => true,
+                    'cart' => $_SESSION['cart'],
+                    'cartCount' => $this->cartModel->getCartCount(),
+                    'message' => 'Đã đồng bộ giỏ hàng'
+                ]);
+                return;
+            }
+        }
+        
+        $this->jsonResponse([
+            'success' => false,
+            'message' => 'Dữ liệu không hợp lệ'
+        ], 400);
     }
 }
 ?>
