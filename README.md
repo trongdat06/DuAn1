@@ -11,6 +11,7 @@ Dự án bán điện thoại và phụ kiện điện tử được xây dựng
 - Thêm sản phẩm vào giỏ hàng
 - Quản lý giỏ hàng (thêm, sửa, xóa)
 - Đặt hàng và thanh toán
+- **Thanh toán qua VNPay** (Ví điện tử)
 - Xem danh mục sản phẩm
 
 ### Cho Admin:
@@ -82,9 +83,21 @@ DuAn1/
 - jQuery
 - PDO
 
+## Thanh Toán VNPay
+
+Hệ thống đã tích hợp thanh toán qua VNPay. Xem chi tiết tại [VNPAY_SETUP.md](VNPAY_SETUP.md)
+
+### Test Thanh Toán (Sandbox):
+- Ngân hàng: NCB
+- Số thẻ: 9704198526191432198
+- Tên: NGUYEN VAN A
+- Ngày phát hành: 07/15
+- OTP: 123456
+
 ## Lưu Ý
 
 - Đảm bảo PHP đã cài đặt extension PDO và PDO_MySQL
 - Database phải được import trước khi sử dụng
 - Session phải được bật trong PHP
+- Để sử dụng VNPay production, cần đăng ký tài khoản merchant tại https://vnpay.vn
 

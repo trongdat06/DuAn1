@@ -184,74 +184,102 @@ $productModel = new ProductModel();
     <!-- Main Content: Sidebar + Products Grid -->
     <div class="container mt-4 mb-5">
         <div class="row">
-            <!-- Left Sidebar - Promotional Banners -->
+            <!-- Left Sidebar - Promotional Banners Carousel -->
             <div class="col-lg-3 d-none d-lg-block">
-                <div class="promo-sidebar" style="position: sticky; top: 200px;">
-                    <!-- Banner 1: Samsung Galaxy S25 Ultra -->
-                    <div class="promo-banner mb-4 bg-white border rounded overflow-hidden shadow-sm">
-                        <div class="position-relative samsung-banner" style="background: linear-gradient(180deg, #a78bfa 0%, #6b21a8 100%); padding: 25px 20px;">
-                            <h4 class="text-white fw-bold mb-2" style="font-size: 1.5rem; line-height: 1.2;">SAMSUNG Galaxy S25 Ultra</h4>
-                            <p class="text-white mb-3" style="font-size: 0.9rem; opacity: 0.95;">12GB 256GB</p>
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="text-white fw-bold me-3" style="font-size: 1.8rem;">26.49 Triệu</span>
-                                <span class="badge bg-danger rounded-pill px-3 py-2" style="font-size: 0.85rem; font-weight: 600;">Giảm 2 Triệu</span>
+                <!-- <div class="promo-sidebar" style="position: sticky; top: 200px;"> -->
+                    <!-- Promo Carousel -->
+                    <div id="promoCarousel" class="carousel slide promo-carousel" data-bs-ride="carousel" data-bs-interval="4000">
+                        <div class="carousel-indicators promo-indicators">
+                            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="0" class="active"></button>
+                            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="1"></button>
+                            <button type="button" data-bs-target="#promoCarousel" data-bs-slide-to="2"></button>
+                        </div>
+                        <div class="carousel-inner rounded overflow-hidden shadow-sm">
+                            <!-- Slide 1: Samsung Galaxy S25 Ultra -->
+                            <div class="carousel-item active">
+                                <div class="promo-slide samsung-banner" style="background: linear-gradient(180deg, #a78bfa 0%, #6b21a8 100%); padding: 25px 20px; min-height: 480px;">
+                                    <h4 class="text-white fw-bold mb-2" style="font-size: 1.4rem; line-height: 1.2;">SAMSUNG Galaxy S25 Ultra</h4>
+                                    <p class="text-white mb-3" style="font-size: 0.85rem; opacity: 0.95;">12GB 256GB</p>
+                                    <div class="d-flex align-items-center flex-wrap mb-3">
+                                        <span class="text-white fw-bold me-2" style="font-size: 1.6rem;">26.49</span>
+                                        <span class="text-white" style="font-size: 1rem;">Triệu</span>
+                                        <span class="badge bg-danger rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem;">Giảm 2 Triệu</span>
+                                    </div>
+                                    <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 1.7;">
+                                        <li class="mb-2">
+                                            <i class="bi bi-check-circle-fill me-2"></i>
+                                            Miễn phí 6 tháng + Google AI Pro
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-check-circle-fill me-2"></i>
+                                            S-Student | S-Teacher Giảm thêm 7% tối đa 700K
+                                        </li>
+                                    </ul>
+                                    <a href="<?= BASE_URL ?>product/search?keyword=Samsung+Galaxy+S25" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
+                                </div>
+                                <div class="text-center p-2 bg-white border-top">
+                                    <span class="text-dark fw-semibold" style="font-size: 0.9rem;">Galaxy S25</span>
+                                </div>
                             </div>
-                            <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                                <li class="mb-2">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    Miễn phí 6 tháng + Google AI Pro
-                                </li>
-                                <li>
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    S-Student | S-Teacher Giảm thêm 7% tối đa 700K
-                                </li>
-                            </ul>
-                            <a href="<?= BASE_URL ?>product/search?keyword=Samsung+Galaxy+S25" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 1rem; border-radius: 8px;">MUA NGAY</a>
-                        </div>
-                        <div class="text-center p-3 border-top" style="background: #fff; border-color: #e5e7eb !important;">
-                            <span class="text-dark fw-semibold" style="font-size: 0.95rem;">Galaxy S25</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Banner 2: OPPO Find X9 -->
-                    <div class="promo-banner bg-white border rounded overflow-hidden shadow-sm">
-                        <div class="p-4 oppo-banner" style="background: #ec4899; padding: 25px 20px;">
-                            <h5 class="text-white fw-bold mb-2" style="font-size: 1.3rem; line-height: 1.3;">OPPO AI Phone Find X9 Series</h5>
-                            <p class="text-white mb-3" style="font-size: 0.9rem; opacity: 0.95;">HASSELBLAD</p>
-                            <div class="mb-3">
-                                <p class="text-white mb-2" style="font-size: 1rem;">
-                                    Giá chỉ từ: <strong style="font-size: 1.2rem;">22.990.000₫</strong>
-                                </p>
-                                <p class="text-white" style="font-size: 0.95rem; opacity: 0.95;">
-                                    Bộ Quà Tặng Trị Giá 10.000.000₫
-                                </p>
+                            
+                            <!-- Slide 2: OPPO Find X9 -->
+                            <div class="carousel-item">
+                                <div class="promo-slide oppo-banner" style="background: linear-gradient(180deg, #ec4899 0%, #be185d 100%); padding: 25px 20px; min-height: 480px;">
+                                    <h4 class="text-white fw-bold mb-2" style="font-size: 1.3rem; line-height: 1.2;">OPPO AI Phone Find X9 Series</h4>
+                                    <p class="text-white mb-3" style="font-size: 0.85rem; opacity: 0.95;">HASSELBLAD</p>
+                                    <div class="mb-3">
+                                        <p class="text-white mb-1" style="font-size: 0.9rem;">
+                                            Giá chỉ từ: <strong style="font-size: 1.1rem;">22.990.000₫</strong>
+                                        </p>
+                                        <p class="text-white mb-0" style="font-size: 0.85rem; opacity: 0.95;">
+                                            Bộ Quà Tặng Trị Giá 10.000.000₫
+                                        </p>
+                                    </div>
+                                    <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.8rem; line-height: 1.6;">
+                                        <li class="mb-1"><i class="bi bi-check-circle-fill me-2"></i>Premium Service</li>
+                                        <li class="mb-1"><i class="bi bi-check-circle-fill me-2"></i>Bảo Hành 24 Tháng</li>
+                                        <li class="mb-1"><i class="bi bi-check-circle-fill me-2"></i>Bảo Hiểm Màn Hình 12 Tháng</li>
+                                        <li><i class="bi bi-check-circle-fill me-2"></i>Bảo Hành Tận Nơi Toàn Cầu</li>
+                                    </ul>
+                                    <a href="<?= BASE_URL ?>product/search?keyword=OPPO+Find" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
+                                </div>
+                                <div class="text-center p-2 bg-white border-top">
+                                    <span class="text-dark fw-semibold" style="font-size: 0.9rem;">OPPO Find X9</span>
+                                </div>
                             </div>
-                            <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 1.8;">
-                                <li class="mb-1">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    Premium Service
-                                </li>
-                                <li class="mb-1">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    Bảo Hành 24 Tháng
-                                </li>
-                                <li class="mb-1">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    Bảo Hiểm Màn Hình 12 Tháng
-                                </li>
-                                <li class="mb-1">
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    Bảo Hành Tận Nơi
-                                </li>
-                                <li>
-                                    <i class="bi bi-check-circle-fill me-2"></i>
-                                    Toàn Cầu
-                                </li>
-                            </ul>
-                            <a href="<?= BASE_URL ?>product/search?keyword=OPPO+Find+X9" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
+                            
+                            <!-- Slide 3: iPhone 16 Pro -->
+                            <div class="carousel-item">
+                                <div class="promo-slide iphone-banner" style="background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); padding: 25px 20px; min-height: 480px;">
+                                    <h4 class="text-white fw-bold mb-2" style="font-size: 1.4rem; line-height: 1.2;">iPhone 16 Pro Max</h4>
+                                    <p class="text-white mb-3" style="font-size: 0.85rem; opacity: 0.95;">256GB | Titan Đen</p>
+                                    <div class="d-flex align-items-center flex-wrap mb-3">
+                                        <span class="text-white fw-bold me-2" style="font-size: 1.6rem;">34.99</span>
+                                        <span class="text-white" style="font-size: 1rem;">Triệu</span>
+                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem;">Trả góp 0%</span>
+                                    </div>
+                                    <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 1.7;">
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Apple Intelligence</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Camera Control mới</li>
+                                        <li><i class="bi bi-check-circle-fill me-2"></i>Chip A18 Pro mạnh mẽ</li>
+                                    </ul>
+                                    <a href="<?= BASE_URL ?>product/search?keyword=iPhone+16" class="btn btn-light w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
+                                </div>
+                                <div class="text-center p-2 bg-white border-top">
+                                    <span class="text-dark fw-semibold" style="font-size: 0.9rem;">iPhone 16 Pro</span>
+                                </div>
+                            </div>
                         </div>
+                        
+                        <!-- Navigation Arrows -->
+                        <button class="carousel-control-prev promo-nav" type="button" data-bs-target="#promoCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next promo-nav" type="button" data-bs-target="#promoCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
                     </div>
-                </div>
+                <!-- </div> -->
             </div>
             
             <!-- Right: Products Grid -->
@@ -517,6 +545,73 @@ $productModel = new ProductModel();
     top: 200px;
     max-height: calc(100vh - 220px);
     overflow-y: auto;
+}
+
+/* Promo Carousel Styles */
+.promo-carousel {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.promo-carousel .carousel-inner {
+    border-radius: 12px;
+}
+
+.promo-carousel .promo-slide {
+    transition: all 0.3s ease;
+}
+
+.promo-carousel .carousel-item {
+    transition: transform 0.6s ease-in-out;
+}
+
+.promo-indicators {
+    bottom: 50px;
+    margin-bottom: 0;
+}
+
+.promo-indicators button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    margin: 0 4px;
+}
+
+.promo-indicators button.active {
+    background: #fff;
+    width: 24px;
+    border-radius: 4px;
+}
+
+.promo-nav {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+.promo-carousel:hover .promo-nav {
+    opacity: 1;
+}
+
+.promo-nav:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.promo-nav .carousel-control-prev-icon,
+.promo-nav .carousel-control-next-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.iphone-banner {
+    background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%) !important;
 }
 
 @media (max-width: 991px) {

@@ -98,8 +98,14 @@ class CartController extends BaseController {
             $variantId = isset($_POST['variant_id']) ? (int)$_POST['variant_id'] : 0;
             $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 0;
             
+            // Debug log
+            error_log("Cart update: variantId=$variantId, quantity=$quantity");
+            
             if ($variantId > 0) {
-                if ($this->cartModel->updateCart($variantId, $quantity)) {
+                $result = $this->cartModel->updateCart($variantId, $quantity);
+                error_log("Cart update result: " . ($result ? 'true' : 'false'));
+                
+                if ($result) {
                     if (isset($_POST['ajax']) || isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                         $this->jsonResponse([
                             'success' => true,
@@ -120,6 +126,15 @@ class CartController extends BaseController {
                         return;
                     }
                     $_SESSION['error'] = 'Không đủ hàng trong kho';
+                }
+            } else {
+                // Invalid variant ID
+                if (isset($_POST['ajax']) || isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+                    $this->jsonResponse([
+                        'success' => false,
+                        'message' => 'ID sản phẩm không hợp lệ'
+                    ], 400);
+                    return;
                 }
             }
         }
@@ -234,6 +249,13 @@ class CartController extends BaseController {
                 );
             }
             
+            // Nếu thanh toán VNPay, chuyển hướng đến VNPay
+            if ($paymentMethod === 'VNPay') {
+                $_SESSION['pending_order_id'] = $orderId;
+                $this->redirect('cart/vnpayPayment/' . $orderId);
+                return;
+            }
+            
             // Xóa giỏ hàng
             $this->cartModel->clearCart();
             
@@ -241,6 +263,119 @@ class CartController extends BaseController {
             $this->redirect('cart/orderSuccess/' . $orderId);
         } else {
             $_SESSION['error'] = 'Không thể tạo đơn hàng';
+            $this->redirect('cart/checkout');
+        }
+    }
+    
+    public function vnpayPayment($orderId) {
+        $order = $this->orderModel->getOrderById($orderId);
+        
+        if (!$order) {
+            $_SESSION['error'] = 'Đơn hàng không tồn tại';
+            $this->redirect('cart/index');
+            return;
+        }
+        
+        // Load VNPay config
+        require_once 'vnpay_php/config.php';
+        
+        $vnp_TxnRef = $orderId;
+        $vnp_OrderInfo = 'Thanh toán đơn hàng #' . $orderId;
+        $vnp_OrderType = 'billpayment';
+        $vnp_Amount = $order['total_amount'] * 100;
+        $vnp_Locale = 'vn';
+        $vnp_BankCode = '';
+        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+        
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+        );
+        
+        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
+        
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+        
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+        
+        header('Location: ' . $vnp_Url);
+        die();
+    }
+    
+    public function vnpayReturn() {
+        // Load VNPay config
+        require_once 'vnpay_php/config.php';
+        
+        $vnp_SecureHash = $_GET['vnp_SecureHash'] ?? '';
+        $inputData = array();
+        foreach ($_GET as $key => $value) {
+            if (substr($key, 0, 4) == "vnp_") {
+                $inputData[$key] = $value;
+            }
+        }
+        
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+        $i = 0;
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashData = $hashData . urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+        }
+        
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+        
+        $orderId = $_GET['vnp_TxnRef'] ?? 0;
+        $vnpResponseCode = $_GET['vnp_ResponseCode'] ?? '';
+        
+        if ($secureHash == $vnp_SecureHash) {
+            if ($vnpResponseCode == '00') {
+                // Thanh toán thành công
+                $this->orderModel->updateOrderStatus($orderId, 2); // Đã thanh toán
+                $this->cartModel->clearCart();
+                unset($_SESSION['pending_order_id']);
+                
+                $_SESSION['success'] = 'Thanh toán thành công! Mã đơn hàng: #' . $orderId;
+                $this->redirect('cart/orderSuccess/' . $orderId);
+            } else {
+                // Thanh toán thất bại
+                $_SESSION['error'] = 'Thanh toán thất bại. Vui lòng thử lại.';
+                $this->redirect('cart/checkout');
+            }
+        } else {
+            $_SESSION['error'] = 'Chữ ký không hợp lệ';
             $this->redirect('cart/checkout');
         }
     }

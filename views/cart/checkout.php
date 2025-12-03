@@ -253,7 +253,7 @@ textarea:focus {
                                 <i class="bi bi-credit-card me-1"></i> Phương Thức Thanh Toán <span class="text-danger">*</span>
                             </label>
                             <div class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="payment-option">
                                         <input type="radio" name="payment_method" id="payment_cash" value="Tiền mặt" checked>
                                         <label for="payment_cash">
@@ -265,7 +265,19 @@ textarea:focus {
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <div class="payment-option">
+                                        <input type="radio" name="payment_method" id="payment_vnpay" value="VNPay">
+                                        <label for="payment_vnpay">
+                                            <div class="payment-icon text-danger">
+                                                <i class="bi bi-wallet2"></i>
+                                            </div>
+                                            <strong class="d-block mb-1">VNPay</strong>
+                                            <small class="text-muted">Ví điện tử VNPay</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="payment-option">
                                         <input type="radio" name="payment_method" id="payment_bank" value="Chuyển khoản">
                                         <label for="payment_bank">
@@ -277,7 +289,7 @@ textarea:focus {
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="payment-option">
                                         <input type="radio" name="payment_method" id="payment_card" value="Thẻ tín dụng">
                                         <label for="payment_card">

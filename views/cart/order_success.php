@@ -1,3 +1,6 @@
+<?php require_once __DIR__ . '/../layouts/header.php'; ?>
+
+<div class="container my-5">
 <div class="text-center mb-5">
     <div class="mb-4">
         <div class="d-inline-block p-4 rounded-circle bg-success bg-opacity-10">
@@ -92,4 +95,6 @@
         </div>
     </div>
 </div>
+</div>
 
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

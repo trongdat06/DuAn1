@@ -57,6 +57,8 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s;
+    position: relative;
+    z-index: 10;
 }
 .quantity-btn:hover:not(:disabled) {
     background: #dc3545;
@@ -67,6 +69,14 @@
 .quantity-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+.quantity-btn i,
+.remove-btn i {
+    pointer-events: none;
+}
+.quantity-controls {
+    position: relative;
+    z-index: 10;
 }
 .quantity-input-cart {
     width: 60px;
@@ -256,7 +266,8 @@
                                         </div>
                                         <button type="button" class="remove-btn remove-item-btn" 
                                                 data-variant-id="<?= $item['variant_id'] ?>"
-                                                title="Xóa sản phẩm">
+                                                title="Xóa sản phẩm"
+                                                onclick="removeCartItem(<?= $item['variant_id'] ?>); event.stopPropagation(); return false;">
                                             <i class="bi bi-x-circle"></i>
                                         </button>
                                     </div>
@@ -271,20 +282,25 @@
                                             <button type="button" 
                                                     class="quantity-btn quantity-decrease" 
                                                     data-variant-id="<?= $item['variant_id'] ?>"
+                                                    data-stock="<?= $item['stock_quantity'] ?>"
+                                                    onclick="decreaseQty(<?= $item['variant_id'] ?>, <?= $item['stock_quantity'] ?>); event.stopPropagation(); return false;"
                                                     <?= $item['quantity'] <= 1 ? 'disabled' : '' ?>>
                                                 <i class="bi bi-dash"></i>
                                             </button>
                                             <input type="number" 
                                                    class="quantity-input-cart quantity-input" 
+                                                   id="qty-input-<?= $item['variant_id'] ?>"
                                                    value="<?= $item['quantity'] ?>" 
                                                    min="1" 
                                                    max="<?= $item['stock_quantity'] ?>"
                                                    data-variant-id="<?= $item['variant_id'] ?>"
                                                    data-price="<?= $item['price'] ?>"
                                                    data-stock="<?= $item['stock_quantity'] ?>"
+                                                   data-current-qty="<?= $item['quantity'] ?>"
                                                    readonly>
                                             <button type="button" 
-                                                    class="quantity-btn quantity-increase" 
+                                                    class="quantity-btn quantity-increase"
+                                                    onclick="increaseQty(<?= $item['variant_id'] ?>, <?= $item['stock_quantity'] ?>); event.stopPropagation(); return false;" 
                                                     data-variant-id="<?= $item['variant_id'] ?>"
                                                     data-stock="<?= $item['stock_quantity'] ?>"
                                                     <?= $item['quantity'] >= $item['stock_quantity'] ? 'disabled' : '' ?>>
@@ -362,8 +378,146 @@
     <?php endif; ?>
 </div>
 
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>
+
 <script>
+// Global functions for quantity buttons
+function increaseQty(variantId, maxStock) {
+    console.log('increaseQty called:', variantId, maxStock);
+    var input = $('#qty-input-' + variantId);
+    var currentQty = parseInt(input.val()) || 1;
+    
+    if (currentQty < maxStock) {
+        input.val(currentQty + 1);
+        updateQuantityAjax(variantId, currentQty + 1);
+    } else {
+        alert('Số lượng không được vượt quá tồn kho (' + maxStock + ')');
+    }
+}
+
+function decreaseQty(variantId, maxStock) {
+    console.log('decreaseQty called:', variantId);
+    var input = $('#qty-input-' + variantId);
+    var currentQty = parseInt(input.val()) || 1;
+    
+    if (currentQty > 1) {
+        input.val(currentQty - 1);
+        updateQuantityAjax(variantId, currentQty - 1);
+    }
+}
+
+function updateQuantityAjax(variantId, quantity) {
+    console.log('updateQuantityAjax:', variantId, quantity);
+    
+    var card = $('.cart-item-card[data-variant-id="' + variantId + '"]');
+    var input = $('#qty-input-' + variantId);
+    var price = parseFloat(input.data('price'));
+    var subtotal = price * quantity;
+    
+    // Disable buttons
+    card.find('.quantity-btn').prop('disabled', true);
+    
+    $.ajax({
+        url: BASE_URL + 'cart/update',
+        method: 'POST',
+        data: {
+            variant_id: variantId,
+            quantity: quantity,
+            ajax: 1
+        },
+        dataType: 'json',
+        success: function(response) {
+            console.log('AJAX response:', response);
+            if (response.success) {
+                // Update subtotal display
+                card.find('.item-subtotal').text(subtotal.toLocaleString('vi-VN') + '₫');
+                card.data('subtotal', subtotal);
+                input.data('current-qty', quantity);
+                
+                // Update buttons state
+                var maxQty = parseInt(input.data('stock'));
+                card.find('.quantity-decrease').prop('disabled', quantity <= 1);
+                card.find('.quantity-increase').prop('disabled', quantity >= maxQty);
+                
+                // Update totals - call global function
+                updateCartTotals();
+                
+                showToast('Đã cập nhật số lượng', 'success');
+            } else {
+                input.val(input.data('current-qty'));
+                showToast(response.message || 'Không thể cập nhật số lượng', 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            input.val(input.data('current-qty'));
+            showToast('Không thể cập nhật số lượng. Vui lòng thử lại.', 'danger');
+        },
+        complete: function() {
+            card.find('.quantity-btn').prop('disabled', false);
+            // Re-check button states
+            var currentVal = parseInt(input.val());
+            var maxQty = parseInt(input.data('stock'));
+            card.find('.quantity-decrease').prop('disabled', currentVal <= 1);
+            card.find('.quantity-increase').prop('disabled', currentVal >= maxQty);
+        }
+    });
+}
+
+// Global function to update cart totals
+function updateCartTotals() {
+    var total = 0;
+    var selectedCount = 0;
+    
+    $('.item-checkbox:checked:not(:disabled)').each(function() {
+        var card = $(this).closest('.cart-item-card');
+        var input = card.find('.quantity-input');
+        var price = parseFloat(input.data('price')) || 0;
+        var qty = parseInt(input.val()) || 0;
+        
+        if (price > 0 && qty > 0) {
+            var subtotal = price * qty;
+            card.find('.item-subtotal').text(subtotal.toLocaleString('vi-VN') + '₫');
+            total += subtotal;
+            selectedCount++;
+        }
+    });
+    
+    var formattedTotal = total.toLocaleString('vi-VN') + '₫';
+    $('#selectedTotal').text(formattedTotal);
+    $('#subtotal').text(formattedTotal);
+    $('#selectedCount').text(selectedCount);
+    $('#removeCount').text(selectedCount);
+    $('#selectedTotalPreview').text(formattedTotal);
+}
+
+// Toast notification
+function showToast(message, type) {
+    type = type || 'info';
+    var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999; min-width: 300px;" role="alert">' +
+        '<i class="bi bi-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + ' me-2"></i>' +
+        message +
+        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+        '</div>';
+    $('body').append(alertHtml);
+    setTimeout(function() {
+        $('.alert').fadeOut(function() {
+            $(this).remove();
+        });
+    }, 3000);
+}
+
+function removeCartItem(variantId) {
+    console.log('removeCartItem:', variantId);
+    if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+        window.location.href = BASE_URL + 'cart/remove/' + variantId;
+    }
+}
+
 $(document).ready(function() {
+    console.log('Cart page loaded');
+    console.log('BASE_URL:', BASE_URL);
+    
     // Select All checkbox
     $('#selectAll').on('change', function() {
         var isChecked = $(this).prop('checked');
@@ -395,8 +549,9 @@ $(document).ready(function() {
     
     // Click on card to toggle checkbox (except on buttons and inputs)
     $(document).on('click', '.cart-item-card.selectable', function(e) {
-        // Don't trigger if clicking on buttons, inputs, or links
-        if ($(e.target).closest('button, input, a, .quantity-controls, .remove-btn').length) {
+        // Don't trigger if clicking on buttons, inputs, links, or icons
+        var target = $(e.target);
+        if (target.closest('button, input, a, .quantity-controls, .remove-btn, .quantity-btn, .bi, i').length) {
             return;
         }
         
@@ -451,36 +606,70 @@ $(document).ready(function() {
     }
     
     // Quantity increase
-    $(document).on('click', '.quantity-increase', function() {
-        var input = $(this).siblings('.quantity-input');
-        var currentQty = parseInt(input.val());
-        var maxQty = parseInt(input.data('stock'));
+    $(document).on('click', '.quantity-increase', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var btn = $(this);
+        var container = btn.closest('.quantity-controls');
+        var input = container.find('.quantity-input');
+        var currentQty = parseInt(input.val()) || 1;
+        var maxQty = parseInt(btn.attr('data-stock')) || 99;
+        var variantId = btn.attr('data-variant-id');
+        
+        console.log('Increase clicked - variantId:', variantId, 'currentQty:', currentQty, 'maxQty:', maxQty);
+        
+        if (!variantId) {
+            console.error('variantId is undefined!');
+            return;
+        }
         
         if (currentQty < maxQty) {
             input.val(currentQty + 1);
-            updateQuantity(input.data('variant-id'), currentQty + 1);
+            updateQuantity(variantId, currentQty + 1);
         } else {
             showAlert('Số lượng không được vượt quá tồn kho (' + maxQty + ')', 'warning');
         }
     });
     
     // Quantity decrease
-    $(document).on('click', '.quantity-decrease', function() {
-        var input = $(this).siblings('.quantity-input');
-        var currentQty = parseInt(input.val());
+    $(document).on('click', '.quantity-decrease', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var btn = $(this);
+        var container = btn.closest('.quantity-controls');
+        var input = container.find('.quantity-input');
+        var currentQty = parseInt(input.val()) || 1;
+        var variantId = btn.attr('data-variant-id');
+        
+        console.log('Decrease clicked - variantId:', variantId, 'currentQty:', currentQty);
+        
+        if (!variantId) {
+            console.error('variantId is undefined!');
+            return;
+        }
         
         if (currentQty > 1) {
             input.val(currentQty - 1);
-            updateQuantity(input.data('variant-id'), currentQty - 1);
+            updateQuantity(variantId, currentQty - 1);
         }
     });
     
     // Update quantity
     function updateQuantity(variantId, quantity) {
+        console.log('updateQuantity called:', variantId, quantity);
+        
         var card = $('.cart-item-card[data-variant-id="' + variantId + '"]');
+        console.log('Card found:', card.length);
+        
         var input = card.find('.quantity-input');
+        console.log('Input found:', input.length);
+        
         var price = parseFloat(input.data('price'));
         var subtotal = price * quantity;
+        
+        console.log('Price:', price, 'Subtotal:', subtotal);
         
         // Disable buttons
         card.find('.quantity-btn').prop('disabled', true);
@@ -489,6 +678,8 @@ $(document).ready(function() {
         if (typeof CartStorage !== 'undefined') {
             CartStorage.updateItem(variantId, quantity);
         }
+        
+        console.log('Sending AJAX to:', '<?= BASE_URL ?>cart/update');
         
         $.ajax({
             url: '<?= BASE_URL ?>cart/update',
@@ -539,7 +730,9 @@ $(document).ready(function() {
                     showAlert(response.message || 'Không thể cập nhật số lượng', 'danger');
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+                console.error('Response:', xhr.responseText);
                 input.val(input.data('current-qty'));
                 if (typeof CartStorage !== 'undefined') {
                     CartStorage.updateItem(variantId, input.data('current-qty'));
@@ -638,29 +831,45 @@ $(document).ready(function() {
     }
     
     // Remove item
-    $(document).on('click', '.remove-item-btn', function() {
-        var variantId = $(this).data('variant-id');
-        var card = $(this).closest('.cart-item-card');
+    $(document).on('click', '.remove-item-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var btn = $(this);
+        var variantId = btn.attr('data-variant-id');
+        
+        console.log('Remove item clicked - variantId:', variantId);
+        
+        if (!variantId) {
+            console.error('variantId is undefined!');
+            return false;
+        }
         
         if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
-            return;
+            return false;
         }
+        
+        btn.prop('disabled', true);
         
         if (typeof CartStorage !== 'undefined') {
             CartStorage.removeItem(variantId);
         }
         
         window.location.href = '<?= BASE_URL ?>cart/remove/' + variantId;
+        return false;
     });
     
     // Remove selected
-    $('#removeSelectedBtn').on('click', function(e) {
+    $(document).on('click', '#removeSelectedBtn', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         var selectedCount = $('.item-checkbox:checked:not(:disabled)').length;
+        console.log('Remove selected clicked:', selectedCount);
+        
         if (selectedCount === 0) {
             showAlert('Vui lòng chọn ít nhất một sản phẩm để xóa', 'warning');
-            return;
+            return false;
         }
         
         var message = selectedCount === 1 
@@ -668,7 +877,7 @@ $(document).ready(function() {
             : 'Bạn có chắc muốn xóa ' + selectedCount + ' sản phẩm đã chọn?';
         
         if (!confirm(message)) {
-            return;
+            return false;
         }
         
         var variantIds = [];
@@ -676,11 +885,14 @@ $(document).ready(function() {
             variantIds.push($(this).val());
         });
         
+        console.log('Removing:', variantIds);
+        
         if (typeof CartStorage !== 'undefined') {
             CartStorage.removeItems(variantIds);
         }
         
         $('#cartForm').submit();
+        return false;
     });
     
     // Checkout button
@@ -754,5 +966,3 @@ $(document).ready(function() {
     });
 });
 </script>
-
-<?php require_once __DIR__ . '/../layouts/footer.php'; ?>
