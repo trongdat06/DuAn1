@@ -133,32 +133,40 @@
                         <div class="auth-card-body">
                             <form method="POST" action="<?= BASE_URL ?>auth/login" id="loginForm">
                                 <div class="mb-4">
-                                    <label for="email" class="form-label fw-bold">
-                                        <i class="bi bi-envelope me-1"></i> Email <span class="text-danger">*</span>
+                                    <label for="username" class="form-label fw-bold">
+                                        <i class="bi bi-person me-1"></i> Tên đăng nhập / Email <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">
-                                            <i class="bi bi-envelope"></i>
+                                            <i class="bi bi-person"></i>
                                         </span>
-                                        <input type="email" class="form-control form-control-lg" id="email" name="email" 
-                                               placeholder="your@email.com" required autofocus>
+                                        <input type="text" class="form-control form-control-lg" id="username" name="username" 
+                                               placeholder="admin hoặc email@example.com" required autofocus>
                                     </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i> Admin dùng username, Khách hàng dùng email
+                                    </small>
                                 </div>
                                 
                                 <div class="mb-4">
                                     <label for="password" class="form-label fw-bold">
-                                        <i class="bi bi-lock me-1"></i> Mật Khẩu
+                                        <i class="bi bi-lock me-1"></i> Mật Khẩu <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">
                                             <i class="bi bi-lock"></i>
                                         </span>
                                         <input type="password" class="form-control form-control-lg" id="password" name="password" 
-                                               placeholder="(Tùy chọn)">
+                                               placeholder="Nhập mật khẩu" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
                                     </div>
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i> Hiện tại hệ thống chỉ cần email để đăng nhập
-                                    </small>
+                                </div>
+                                
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
+                                    <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
                                 </div>
                                 
                                 <button type="submit" class="btn btn-login btn-lg w-100 text-white mb-3">
@@ -189,14 +197,6 @@
                                     </p>
                                     <a href="<?= BASE_URL ?>home/index" class="text-muted small text-decoration-none">
                                         <i class="bi bi-arrow-left me-1"></i> Về Trang Chủ
-                                    </a>
-                                </div>
-                                
-                                <hr class="my-4">
-                                
-                                <div class="text-center">
-                                    <a href="<?= BASE_URL ?>auth/adminLogin" class="btn btn-outline-secondary btn-sm">
-                                        <i class="bi bi-shield-lock me-1"></i> Đăng Nhập Admin
                                     </a>
                                 </div>
                             </form>
@@ -267,24 +267,38 @@
 
 <script>
 $(document).ready(function() {
+    // Toggle password visibility
+    $('#togglePassword').on('click', function() {
+        var passwordInput = $('#password');
+        var icon = $(this).find('i');
+        
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    });
+    
     $('#loginForm').on('submit', function(e) {
         var btn = $(this).find('button[type="submit"]');
         var originalText = btn.html();
         
-        var email = $('#email').val().trim();
+        var username = $('#username').val().trim();
+        var password = $('#password').val();
         
-        if (!email) {
+        if (!username) {
             e.preventDefault();
-            showAlert('Vui lòng nhập email', 'warning');
+            showAlert('Vui lòng nhập tên đăng nhập hoặc email', 'warning');
+            $('#username').focus();
             return false;
         }
         
-        // Email validation
-        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!password) {
             e.preventDefault();
-            showAlert('Email không hợp lệ. Vui lòng nhập đúng định dạng email', 'warning');
-            $('#email').focus();
+            showAlert('Vui lòng nhập mật khẩu', 'warning');
+            $('#password').focus();
             return false;
         }
         

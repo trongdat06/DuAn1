@@ -1,4 +1,35 @@
 <style>
+/* Loading overlay */
+.filter-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    display: none;
+}
+.filter-loading.active {
+    display: flex;
+}
+.filter-loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Fade animation for products */
+#productsGrid {
+    transition: opacity 0.3s ease;
+}
+#productsGrid.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .product-hero-carousel {
     margin-bottom: 30px;
     border-radius: 0 0 30px 30px;
@@ -333,12 +364,12 @@
                         <h5 class="mb-0 fw-bold"><i class="bi bi-list-ul me-2"></i> Danh Mục</h5>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="<?= BASE_URL ?>product/index<?= !empty($_GET) ? '?' . http_build_query(array_diff_key($_GET, ['category_id' => ''])) : '' ?>" 
+                        <a href="#" data-category="" 
                            class="list-group-item list-group-item-action <?= empty($filters['category_id']) ? 'active' : '' ?>">
                             <i class="bi bi-grid me-2"></i> Tất Cả
                         </a>
                         <?php foreach ($categories as $category): ?>
-                            <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_merge($_GET, ['category_id' => $category['category_id'], 'page' => 1])) ?>" 
+                            <a href="#" data-category="<?= $category['category_id'] ?>"
                                class="list-group-item list-group-item-action <?= (isset($filters['category_id']) && $filters['category_id'] == $category['category_id']) ? 'active' : '' ?>">
                                 <i class="bi bi-phone me-2"></i> <?= htmlspecialchars($category['category_name']) ?>
                             </a>
@@ -354,14 +385,14 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-2">
-                            <a href="<?= BASE_URL ?>product/index<?= !empty($_GET) ? '?' . http_build_query(array_diff_key($_GET, ['brand' => ''], ['page' => ''])) : '' ?>" 
+                            <a href="#" data-brand=""
                                class="brand-badge <?= empty($filters['brand']) ? 'active' : '' ?>">
                                 Tất cả
                             </a>
                         </div>
                         <div class="d-flex flex-wrap">
                             <?php foreach ($brands as $brand): ?>
-                                <a href="<?= BASE_URL ?>product/index?<?= http_build_query(array_merge($_GET, ['brand' => $brand, 'page' => 1])) ?>" 
+                                <a href="#" data-brand="<?= htmlspecialchars($brand) ?>"
                                    class="brand-badge <?= (isset($filters['brand']) && $filters['brand'] == $brand) ? 'active' : '' ?>">
                                     <?= htmlspecialchars($brand) ?>
                                 </a>
@@ -404,13 +435,24 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="in_stock" value="1" 
                                    id="inStock" <?= (isset($filters['in_stock']) && $filters['in_stock']) ? 'checked' : '' ?>
-                                   onchange="document.getElementById('filterForm').submit()">
+                                   onchange="this.form.submit()">
                             <label class="form-check-label" for="inStock">
                                 <i class="bi bi-check-circle me-1"></i> Chỉ hiển thị còn hàng
                             </label>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Hidden fields to preserve filters -->
+                <?php if (!empty($filters['category_id'])): ?>
+                <input type="hidden" name="category_id" value="<?= $filters['category_id'] ?>">
+                <?php endif; ?>
+                <?php if (!empty($filters['brand'])): ?>
+                <input type="hidden" name="brand" value="<?= htmlspecialchars($filters['brand']) ?>">
+                <?php endif; ?>
+                <?php if (!empty($sort)): ?>
+                <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
+                <?php endif; ?>
 
                 <!-- Search -->
                 <div class="card shadow-sm filter-card border-0">
@@ -504,13 +546,22 @@
                         <div class="d-flex align-items-center">
                             <span class="text-muted me-2 small fw-bold">Sắp xếp:</span>
                             <select name="sort" class="form-select form-select-sm" style="max-width: 200px;" 
-                                    onchange="var url = new URL(window.location.href); url.searchParams.set('sort', this.value); url.searchParams.set('page', '1'); window.location.href = url.toString();">
-                                <option value="newest" <?= ($sort == 'newest') ? 'selected' : '' ?>>Mới nhất</option>
-                                <option value="price_asc" <?= ($sort == 'price_asc') ? 'selected' : '' ?>>Giá: Thấp → Cao</option>
-                                <option value="price_desc" <?= ($sort == 'price_desc') ? 'selected' : '' ?>>Giá: Cao → Thấp</option>
-                                <option value="name_asc" <?= ($sort == 'name_asc') ? 'selected' : '' ?>>Tên: A → Z</option>
-                                <option value="name_desc" <?= ($sort == 'name_desc') ? 'selected' : '' ?>>Tên: Z → A</option>
+                                    onchange="applySort(this.value)">
+                                <option value="newest" <?= (isset($sort) && $sort == 'newest') ? 'selected' : '' ?>>Mới nhất</option>
+                                <option value="price_asc" <?= (isset($sort) && $sort == 'price_asc') ? 'selected' : '' ?>>Giá: Thấp → Cao</option>
+                                <option value="price_desc" <?= (isset($sort) && $sort == 'price_desc') ? 'selected' : '' ?>>Giá: Cao → Thấp</option>
+                                <option value="name_asc" <?= (isset($sort) && $sort == 'name_asc') ? 'selected' : '' ?>>Tên: A → Z</option>
+                                <option value="name_desc" <?= (isset($sort) && $sort == 'name_desc') ? 'selected' : '' ?>>Tên: Z → A</option>
                             </select>
+                            
+                            <script>
+                            function applySort(sortValue) {
+                                var url = new URL(window.location.href);
+                                url.searchParams.set('sort', sortValue);
+                                url.searchParams.set('page', '1');
+                                window.location.href = url.toString();
+                            }
+                            </script>
                         </div>
                     </div>
                     <div class="col-md-6 text-md-end">
@@ -660,5 +711,157 @@ $(document).ready(function() {
             }, 800);
         }
     });
+    
+    // AJAX Filter functionality
+    var currentFilters = {
+        category_id: '<?= $filters['category_id'] ?? '' ?>',
+        brand: '<?= $filters['brand'] ?? '' ?>',
+        min_price: '<?= $filters['min_price'] ?? '' ?>',
+        max_price: '<?= $filters['max_price'] ?? '' ?>',
+        in_stock: '<?= isset($filters['in_stock']) && $filters['in_stock'] ? '1' : '' ?>',
+        sort: '<?= $sort ?? 'newest' ?>',
+        page: '<?= $page ?? 1 ?>'
+    };
+    
+    // Update URL without reload
+    function updateURL() {
+        var params = new URLSearchParams();
+        for (var key in currentFilters) {
+            if (currentFilters[key] !== '' && currentFilters[key] !== null) {
+                params.set(key, currentFilters[key]);
+            }
+        }
+        var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.pushState({filters: currentFilters}, '', newUrl);
+    }
+    
+    // Apply filter with AJAX
+    function applyFilterAjax() {
+        $('#productsGrid').addClass('loading');
+        
+        // Show loading
+        if (!$('.filter-loading').length) {
+            $('body').append('<div class="filter-loading"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+        }
+        $('.filter-loading').addClass('active');
+        
+        // Build query string
+        var params = new URLSearchParams();
+        for (var key in currentFilters) {
+            if (currentFilters[key] !== '' && currentFilters[key] !== null) {
+                params.set(key, currentFilters[key]);
+            }
+        }
+        params.set('ajax', '1');
+        
+        $.ajax({
+            url: BASE_URL + 'product/filterAjax?' + params.toString(),
+            method: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Update products grid
+                    $('#productsGrid').html(response.html);
+                    
+                    // Update product count
+                    $('.sort-view-bar .text-muted.small').html(
+                        'Hiển thị <strong class="text-danger">' + response.count + '</strong> / <strong>' + response.total + '</strong> sản phẩm'
+                    );
+                    
+                    // Update pagination if exists
+                    if (response.pagination) {
+                        $('.pagination').parent().html(response.pagination);
+                    }
+                    
+                    // Update URL
+                    updateURL();
+                    
+                    // Scroll to products
+                    $('html, body').animate({
+                        scrollTop: $('#productsGrid').offset().top - 150
+                    }, 300);
+                }
+            },
+            error: function() {
+                // Fallback to page reload
+                var url = BASE_URL + 'product/index?' + params.toString();
+                window.location.href = url;
+            },
+            complete: function() {
+                $('#productsGrid').removeClass('loading');
+                $('.filter-loading').removeClass('active');
+            }
+        });
+    }
+    
+    // Handle sort change with AJAX
+    window.applySort = function(sortValue) {
+        currentFilters.sort = sortValue;
+        currentFilters.page = '1';
+        applyFilterAjax();
+    };
+    
+    // Handle category filter click
+    $(document).on('click', '.list-group-item[data-category]', function(e) {
+        e.preventDefault();
+        var categoryId = $(this).data('category');
+        currentFilters.category_id = categoryId || '';
+        currentFilters.page = '1';
+        
+        // Update active state
+        $('.list-group-item[data-category]').removeClass('active');
+        $(this).addClass('active');
+        
+        applyFilterAjax();
+    });
+    
+    // Handle brand filter click
+    $(document).on('click', '.brand-badge[data-brand]', function(e) {
+        e.preventDefault();
+        var brand = $(this).data('brand');
+        currentFilters.brand = brand || '';
+        currentFilters.page = '1';
+        
+        // Update active state
+        $('.brand-badge[data-brand]').removeClass('active');
+        $(this).addClass('active');
+        
+        applyFilterAjax();
+    });
+    
+    // Handle in_stock checkbox
+    $('#inStock').on('change', function() {
+        currentFilters.in_stock = $(this).is(':checked') ? '1' : '';
+        currentFilters.page = '1';
+        applyFilterAjax();
+    });
+    
+    // Handle price filter
+    $('#filterForm').on('submit', function(e) {
+        e.preventDefault();
+        currentFilters.min_price = $('input[name="min_price"]').val() || '';
+        currentFilters.max_price = $('input[name="max_price"]').val() || '';
+        currentFilters.page = '1';
+        applyFilterAjax();
+    });
+    
+    // Handle pagination click
+    $(document).on('click', '.pagination .page-link', function(e) {
+        e.preventDefault();
+        var href = $(this).attr('href');
+        if (href) {
+            var urlParams = new URLSearchParams(href.split('?')[1]);
+            currentFilters.page = urlParams.get('page') || '1';
+            applyFilterAjax();
+        }
+    });
+    
+    // Handle browser back/forward
+    window.onpopstate = function(event) {
+        if (event.state && event.state.filters) {
+            currentFilters = event.state.filters;
+            applyFilterAjax();
+        }
+    };
 });
 </script>

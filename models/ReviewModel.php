@@ -68,6 +68,24 @@ class ReviewModel extends BaseModel {
         return $result['count'] > 0;
     }
     
+    public function hasPurchased($productId, $customerId) {
+        // Kiểm tra khách hàng đã mua sản phẩm này chưa (đơn hàng đã giao thành công)
+        $sql = "SELECT COUNT(*) as count 
+                FROM Orders o
+                INNER JOIN Order_Details od ON o.order_id = od.order_id
+                INNER JOIN Product_Variants pv ON od.variant_id = pv.variant_id
+                WHERE o.customer_id = :customer_id 
+                AND pv.product_id = :product_id
+                AND o.order_status_id IN (2, 5)"; // 2 = Đã xác nhận, 5 = Đã giao hàng
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':customer_id', $customerId);
+        $stmt->bindParam(':product_id', $productId);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result['count'] > 0;
+    }
+    
     public function getAllReviews($limit = null, $offset = 0) {
         $sql = "SELECT r.*, c.full_name, c.email, p.product_name 
                 FROM Product_Reviews r

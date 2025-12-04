@@ -436,12 +436,27 @@
             
             <!-- Add Review Form -->
             <?php if (isset($_SESSION['customer_id'])): ?>
-                <?php if (!$hasReviewed): ?>
+                <?php if ($hasReviewed): ?>
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Bạn đã đánh giá sản phẩm này rồi. Cảm ơn bạn đã chia sẻ!
+                </div>
+                <?php elseif (!$hasPurchased): ?>
+                <div class="alert alert-info">
+                    <i class="bi bi-bag-check me-2"></i>
+                    <strong>Bạn cần mua sản phẩm này để có thể đánh giá.</strong>
+                    <br><small class="text-muted">Chỉ khách hàng đã mua và nhận hàng thành công mới có thể viết đánh giá.</small>
+                </div>
+                <?php else: ?>
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Viết Đánh Giá</h5>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-success mb-3">
+                            <i class="bi bi-patch-check me-2"></i>
+                            <strong>Đã xác nhận mua hàng</strong> - Bạn có thể đánh giá sản phẩm này
+                        </div>
                         <form method="POST" action="<?= BASE_URL ?>review/create" id="reviewForm">
                             <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
                             <input type="hidden" name="rating" id="rating" value="5" required>
@@ -468,11 +483,6 @@
                             </button>
                         </form>
                     </div>
-                </div>
-                <?php else: ?>
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle me-2"></i>
-                    Bạn đã đánh giá sản phẩm này rồi. Cảm ơn bạn đã chia sẻ!
                 </div>
                 <?php endif; ?>
             <?php else: ?>

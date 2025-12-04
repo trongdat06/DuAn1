@@ -36,6 +36,13 @@ class ReviewController extends BaseController {
                 return;
             }
             
+            // Kiểm tra đã mua hàng chưa
+            if (!$this->reviewModel->hasPurchased($productId, $_SESSION['customer_id'])) {
+                $_SESSION['error'] = 'Bạn cần mua sản phẩm này trước khi đánh giá';
+                $this->redirect('product/detail/' . $productId);
+                return;
+            }
+            
             // Kiểm tra đã đánh giá chưa
             if ($this->reviewModel->hasReviewed($productId, $_SESSION['customer_id'])) {
                 $_SESSION['error'] = 'Bạn đã đánh giá sản phẩm này rồi';

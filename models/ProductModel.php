@@ -4,14 +4,15 @@ require_once 'BaseModel.php';
 class ProductModel extends BaseModel {
     
     public function getAllProducts($limit = null, $offset = 0, $filters = [], $sort = 'newest') {
-        $sql = "SELECT DISTINCT p.*, c.category_name, s.supplier_name,
-                       (SELECT MIN(price) FROM Product_Variants WHERE product_id = p.product_id AND stock_quantity > 0) as min_price,
-                       (SELECT MAX(price) FROM Product_Variants WHERE product_id = p.product_id AND stock_quantity > 0) as max_price
-                FROM Products p 
-                LEFT JOIN Categories c ON p.category_id = c.category_id 
-                LEFT JOIN Suppliers s ON p.supplier_id = s.supplier_id
-                LEFT JOIN Product_Variants pv ON p.product_id = pv.product_id
-                WHERE 1=1";
+        try {
+            $sql = "SELECT DISTINCT p.*, c.category_name, s.supplier_name,
+                           (SELECT MIN(price) FROM Product_Variants WHERE product_id = p.product_id AND stock_quantity > 0) as min_price,
+                           (SELECT MAX(price) FROM Product_Variants WHERE product_id = p.product_id AND stock_quantity > 0) as max_price
+                    FROM Products p 
+                    LEFT JOIN Categories c ON p.category_id = c.category_id 
+                    LEFT JOIN Suppliers s ON p.supplier_id = s.supplier_id
+                    LEFT JOIN Product_Variants pv ON p.product_id = pv.product_id
+                    WHERE 1=1";
         
         $params = [];
         
@@ -82,6 +83,10 @@ class ProductModel extends BaseModel {
         
         $stmt->execute();
         return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("ProductModel::getAllProducts Error: " . $e->getMessage());
+            return [];
+        }
     }
     
     public function getProductsCount($filters = []) {

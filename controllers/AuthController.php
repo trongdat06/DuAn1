@@ -18,41 +18,65 @@ class AuthController extends BaseController {
         if (isset($_SESSION['customer_id'])) {
             $this->redirect('home/index');
         }
+        if (isset($_SESSION['admin_id'])) {
+            $this->redirect('admin/dashboard');
+        }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email = $_POST['email'] ?? '';
+            $username = $_POST['username'] ?? '';
             $password = $_POST['password'] ?? '';
             
-            // Đăng nhập khách hàng
-            $customer = $this->customerModel->getCustomerByEmail($email);
+            // Thử đăng nhập Admin trước
+            $manager = $this->adminModel->login($username, $password);
+            
+            if ($manager) {
+                $_SESSION['admin_id'] = $manager['manager_id'];
+                $_SESSION['admin_username'] = $manager['username'];
+                $_SESSION['admin_name'] = $manager['full_name'];
+                $_SESSION['admin_role'] = $manager['role'];
+                
+                $_SESSION['success'] = 'Đăng nhập Admin thành công!';
+                $this->redirect('admin/dashboard');
+                return;
+            }
+            
+            // Nếu không phải admin, thử đăng nhập khách hàng (dùng username như email)
+            $customer = $this->customerModel->getCustomerByEmail($username);
             
             if ($customer) {
-                // Kiểm tra trạng thái khách hàng
-                $status = $customer['status'] ?? 'active';
-                if ($status === 'locked') {
-                    $_SESSION['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ.';
-                    $this->redirect('auth/login');
+                // Kiểm tra password (nếu có)
+                $storedPassword = $customer['password'] ?? '';
+                
+                // Nếu chưa có password trong DB, cho phép đăng nhập (tương thích ngược)
+                // Hoặc kiểm tra password nếu có
+                if (empty($storedPassword) || password_verify($password, $storedPassword) || $password === $storedPassword) {
+                    // Kiểm tra trạng thái khách hàng
+                    $status = $customer['status'] ?? 'active';
+                    if ($status === 'locked') {
+                        $_SESSION['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ.';
+                        $this->redirect('auth/login');
+                        return;
+                    }
+                    
+                    $_SESSION['customer_id'] = $customer['customer_id'];
+                    $_SESSION['customer_name'] = $customer['full_name'];
+                    $_SESSION['customer_email'] = $customer['email'];
+                    
+                    $_SESSION['success'] = 'Đăng nhập thành công!';
+                    
+                    // Redirect về trang trước đó nếu có
+                    if (isset($_SESSION['redirect_after_login'])) {
+                        $redirectUrl = $_SESSION['redirect_after_login'];
+                        unset($_SESSION['redirect_after_login']);
+                        $this->redirect($redirectUrl);
+                    } else {
+                        $this->redirect('home/index');
+                    }
                     return;
                 }
-                
-                // Tạo session cho khách hàng (không cần password vì chưa có hệ thống password)
-                $_SESSION['customer_id'] = $customer['customer_id'];
-                $_SESSION['customer_name'] = $customer['full_name'];
-                $_SESSION['customer_email'] = $customer['email'];
-                
-                $_SESSION['success'] = 'Đăng nhập thành công!';
-                
-                // Redirect về trang trước đó nếu có
-                if (isset($_SESSION['redirect_after_login'])) {
-                    $redirectUrl = $_SESSION['redirect_after_login'];
-                    unset($_SESSION['redirect_after_login']);
-                    $this->redirect($redirectUrl);
-                } else {
-                    $this->redirect('home/index');
-                }
-            } else {
-                $_SESSION['error'] = 'Email không tồn tại. Vui lòng đăng ký tài khoản mới.';
             }
+            
+            $_SESSION['error'] = 'Tên đăng nhập hoặc mật khẩu không đúng.';
         }
         
         $data = ['pageTitle' => 'Đăng Nhập'];

@@ -112,7 +112,7 @@ $productModel = new ProductModel();
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="<?= BASE_URL ?>home/index?category_id=2" class="nav-link fw-bold text-uppercase <?= (isset($filters['category_id']) && $filters['category_id'] == 2) ? 'active' : '' ?>" id="tablet-tab">
-                        MÁY TÍNH BẢNG
+                        PHỤ KIỆN
                     </a>
                 </li>
             </ul>
@@ -289,7 +289,7 @@ $productModel = new ProductModel();
                         <div class="d-flex align-items-center justify-content-between">
                             <h5 class="mb-0">
                                 <?php if (isset($filters['category_id']) && $filters['category_id'] == 2): ?>
-                                    <span class="badge bg-info me-2">MÁY TÍNH BẢNG</span>
+                                    <span class="badge bg-info me-2">PHỤ KIỆN</span>
                                 <?php endif; ?>
                                 <?php if (!empty($filters['brand'])): ?>
                                     <span class="badge bg-danger me-2"><?= htmlspecialchars($filters['brand']) ?></span>
