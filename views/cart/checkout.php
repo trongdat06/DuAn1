@@ -204,6 +204,9 @@ textarea:focus {
                 </div>
                 <div class="card-body p-4">
                     <form method="POST" action="<?= BASE_URL ?>cart/processOrder" id="checkoutForm">
+                        <?php if (isset($isBuyNow) && $isBuyNow): ?>
+                            <input type="hidden" name="is_buy_now" value="1">
+                        <?php endif; ?>
                         <?php 
                             // Auto-fill thông tin nếu đã đăng nhập
                             $customer = null;

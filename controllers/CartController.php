@@ -63,8 +63,19 @@ class CartController extends BaseController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $variantId = isset($_POST['variant_id']) ? (int)$_POST['variant_id'] : 0;
             $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+            $buyNow = isset($_POST['buy_now']) && $_POST['buy_now'] == '1';
             
             if ($variantId > 0 && $quantity > 0) {
+                // Nếu nhấn "Mua Ngay" - lưu sản phẩm vào session riêng để thanh toán
+                if ($buyNow) {
+                    $_SESSION['buy_now_item'] = [
+                        'variant_id' => $variantId,
+                        'quantity' => $quantity
+                    ];
+                    $this->redirect('cart/buyNow');
+                    return;
+                }
+                
                 if ($this->cartModel->addToCart($variantId, $quantity)) {
                     if (isset($_POST['ajax'])) {
                         $this->jsonResponse([
@@ -195,15 +206,98 @@ class CartController extends BaseController {
         $this->view('cart/checkout', $data);
     }
     
+    // Mua ngay - chỉ thanh toán 1 sản phẩm
+    public function buyNow() {
+        if (!isset($_SESSION['customer_id'])) {
+            $_SESSION['error'] = 'Vui lòng đăng nhập để mua hàng';
+            $this->redirect('auth/login');
+            return;
+        }
+        
+        if (!isset($_SESSION['buy_now_item'])) {
+            $_SESSION['error'] = 'Không có sản phẩm để mua';
+            $this->redirect('product/index');
+            return;
+        }
+        
+        $buyNowItem = $_SESSION['buy_now_item'];
+        $variant = $this->productModel->getVariantById($buyNowItem['variant_id']);
+        
+        if (!$variant) {
+            $_SESSION['error'] = 'Sản phẩm không tồn tại';
+            unset($_SESSION['buy_now_item']);
+            $this->redirect('product/index');
+            return;
+        }
+        
+        if ($variant['stock_quantity'] < $buyNowItem['quantity']) {
+            $_SESSION['error'] = 'Không đủ hàng trong kho';
+            unset($_SESSION['buy_now_item']);
+            $this->redirect('product/index');
+            return;
+        }
+        
+        // Tạo cart item cho sản phẩm mua ngay
+        $cartItems = [[
+            'variant_id' => $variant['variant_id'],
+            'product_name' => $variant['product_name'],
+            'variant_name' => $variant['variant_name'] ?? '',
+            'color' => $variant['color'],
+            'storage' => $variant['storage'],
+            'price' => $variant['price'],
+            'quantity' => $buyNowItem['quantity'],
+            'subtotal' => $variant['price'] * $buyNowItem['quantity'],
+            'stock_quantity' => $variant['stock_quantity']
+        ]];
+        
+        $total = $variant['price'] * $buyNowItem['quantity'];
+        
+        $data = [
+            'cartItems' => $cartItems,
+            'total' => $total,
+            'isBuyNow' => true,
+            'pageTitle' => 'Thanh Toán Nhanh'
+        ];
+        
+        $this->view('cart/checkout', $data);
+    }
+    
     public function processOrder() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('cart/index');
         }
         
-        $cartItems = $this->cartModel->getCartItems();
-        if (empty($cartItems)) {
-            $_SESSION['error'] = 'Giỏ hàng trống';
-            $this->redirect('cart/index');
+        // Kiểm tra xem là Mua Ngay hay thanh toán giỏ hàng
+        $isBuyNow = isset($_POST['is_buy_now']) && $_POST['is_buy_now'] == '1';
+        
+        if ($isBuyNow && isset($_SESSION['buy_now_item'])) {
+            // Xử lý Mua Ngay
+            $buyNowItem = $_SESSION['buy_now_item'];
+            $variant = $this->productModel->getVariantById($buyNowItem['variant_id']);
+            
+            if (!$variant) {
+                $_SESSION['error'] = 'Sản phẩm không tồn tại';
+                unset($_SESSION['buy_now_item']);
+                $this->redirect('product/index');
+                return;
+            }
+            
+            $cartItems = [[
+                'variant_id' => $variant['variant_id'],
+                'price' => $variant['price'],
+                'quantity' => $buyNowItem['quantity'],
+                'subtotal' => $variant['price'] * $buyNowItem['quantity']
+            ]];
+            $total = $variant['price'] * $buyNowItem['quantity'];
+        } else {
+            // Xử lý thanh toán giỏ hàng bình thường
+            $cartItems = $this->cartModel->getCartItems();
+            if (empty($cartItems)) {
+                $_SESSION['error'] = 'Giỏ hàng trống';
+                $this->redirect('cart/index');
+                return;
+            }
+            $total = $this->cartModel->getCartTotal();
         }
         
         // Lấy thông tin khách hàng
@@ -230,7 +324,6 @@ class CartController extends BaseController {
         }
         
         // Tạo đơn hàng
-        $total = $this->cartModel->getCartTotal();
         $paymentMethod = $_POST['payment_method'] ?? 'Tiền mặt';
         $note = $_POST['note'] ?? '';
         
@@ -252,12 +345,19 @@ class CartController extends BaseController {
             // Nếu thanh toán VNPay, chuyển hướng đến VNPay
             if ($paymentMethod === 'VNPay') {
                 $_SESSION['pending_order_id'] = $orderId;
+                if ($isBuyNow) {
+                    unset($_SESSION['buy_now_item']);
+                }
                 $this->redirect('cart/vnpayPayment/' . $orderId);
                 return;
             }
             
-            // Xóa giỏ hàng
-            $this->cartModel->clearCart();
+            // Xóa giỏ hàng hoặc buy_now session
+            if ($isBuyNow) {
+                unset($_SESSION['buy_now_item']);
+            } else {
+                $this->cartModel->clearCart();
+            }
             
             $_SESSION['success'] = 'Đặt hàng thành công! Mã đơn hàng: #' . $orderId;
             $this->redirect('cart/orderSuccess/' . $orderId);

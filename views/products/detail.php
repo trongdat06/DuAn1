@@ -249,12 +249,18 @@
                         <!-- Action Buttons -->
                         <div class="action-buttons">
                             <?php if (isset($_SESSION['customer_id'])): ?>
-                                <button type="submit" class="btn btn-danger btn-lg w-100 mb-3 py-3 fw-bold" style="font-size: 1.1rem;">
-                                    <i class="bi bi-cart-plus me-2"></i> Thêm Vào Giỏ Hàng
-                                </button>
-                                <a href="<?= BASE_URL ?>cart/index" class="btn btn-outline-danger btn-lg w-100 mb-2">
-                                    <i class="bi bi-cart-check me-2"></i> Xem Giỏ Hàng
-                                </a>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <button type="submit" class="btn btn-outline-danger btn-lg w-100 py-3 fw-bold" style="font-size: 1rem;">
+                                            <i class="bi bi-cart-plus me-2"></i> Thêm Giỏ Hàng
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="submit" name="buy_now" value="1" class="btn btn-danger btn-lg w-100 py-3 fw-bold" style="font-size: 1rem;">
+                                            <i class="bi bi-lightning-fill me-2"></i> Mua Ngay
+                                        </button>
+                                    </div>
+                                </div>
                             <?php else: ?>
                                 <a href="<?= BASE_URL ?>auth/login" class="btn btn-danger btn-lg w-100 mb-3 py-3 fw-bold" style="font-size: 1.1rem;">
                                     <i class="bi bi-box-arrow-in-right me-2"></i> Đăng Nhập Để Mua Hàng
@@ -698,12 +704,23 @@ $(document).ready(function() {
         $(this).closest('.variant-card').addClass('border-danger');
     });
     
-    // Add to cart form
+    // Nút Mua Ngay - submit form bình thường (không AJAX)
+    $('button[name="buy_now"]').on('click', function(e) {
+        // Cho phép form submit bình thường để chuyển đến trang thanh toán
+        $('#addToCartForm').off('submit');
+    });
+    
+    // Add to cart form (chỉ cho nút Thêm Giỏ Hàng)
     $('#addToCartForm').on('submit', function(e) {
+        // Nếu nhấn nút Mua Ngay thì submit bình thường
+        if ($(document.activeElement).attr('name') === 'buy_now') {
+            return true;
+        }
+        
         e.preventDefault();
         const form = $(this);
         const formData = form.serialize() + '&ajax=1';
-        const submitBtn = form.find('button[type="submit"]');
+        const submitBtn = form.find('button[type="submit"]:not([name="buy_now"])');
         const originalText = submitBtn.html();
         
         // Disable button and show loading

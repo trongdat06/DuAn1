@@ -13,81 +13,31 @@ $productModel = new ProductModel();
         <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="2"></button>
     </div>
     <div class="carousel-inner">
-        <!-- Slide 1: Sản Phẩm Mới -->
+        <!-- Slide 1 -->
         <div class="carousel-item active">
-            <div class="carousel-slide-wrapper" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 400px; position: relative; overflow: hidden;">
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-lg-6 text-white py-5">
-                            <h1 class="display-4 fw-bold mb-3">Sản Phẩm Mới Nhất</h1>
-                            <p class="lead mb-4">Khám phá bộ sưu tập điện thoại và phụ kiện công nghệ cao với giá ưu đãi</p>
-                            <div class="d-flex gap-3">
-                                <a href="<?= BASE_URL ?>product/index?sort=newest" class="btn btn-light btn-lg px-4">
-                                    <i class="bi bi-arrow-right-circle me-2"></i> Xem Ngay
-                                </a>
-                                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-light btn-lg px-4">
-                                    <i class="bi bi-grid me-2"></i> Tất Cả Sản Phẩm
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 text-center">
-                            <img src="<?= BASE_URL ?>public/images/banner1.jpg" alt="Sản phẩm mới" class="img-fluid rounded shadow-lg" style="max-height: 350px; object-fit: cover;" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <a href="<?= BASE_URL ?>product/index?sort=newest">
+                <img src="<?= BASE_URL ?>public/images/banner1.jpg" class="d-block w-100" alt="Banner 1" 
+                     style="height: 400px; object-fit: cover;"
+                     onerror="this.src='https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80'">
+            </a>
         </div>
         
-        <!-- Slide 2: Khuyến Mãi Hot -->
+        <!-- Slide 2 -->
         <div class="carousel-item">
-            <div class="carousel-slide-wrapper" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); min-height: 400px; position: relative; overflow: hidden;">
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-lg-6 text-white py-5">
-                            <span class="badge bg-danger mb-3 px-3 py-2" style="font-size: 1rem;">KHUYẾN MÃI HOT</span>
-                            <h1 class="display-4 fw-bold mb-3">Giảm Giá Lên Đến 50%</h1>
-                            <p class="lead mb-4">Ưu đãi đặc biệt cho các sản phẩm bán chạy nhất. Nhanh tay đặt hàng ngay!</p>
-                            <div class="d-flex gap-3">
-                                <a href="<?= BASE_URL ?>product/index?sort=price_asc" class="btn btn-light btn-lg px-4">
-                                    <i class="bi bi-tag-fill me-2"></i> Mua Ngay
-                                </a>
-                                <a href="<?= BASE_URL ?>product/index" class="btn btn-outline-light btn-lg px-4">
-                                    <i class="bi bi-percent me-2"></i> Xem Ưu Đãi
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 text-center">
-                            <img src="<?= BASE_URL ?>public/images/banner2.jpg" alt="Khuyến mãi" class="img-fluid rounded shadow-lg" style="max-height: 350px; object-fit: cover;" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <a href="<?= BASE_URL ?>product/index?sort=price_asc">
+                <img src="<?= BASE_URL ?>public/images/banner2.jpg" class="d-block w-100" alt="Banner 2" 
+                     style="height: 400px; object-fit: cover;"
+                     onerror="this.src='https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=1200&q=80'">
+            </a>
         </div>
         
-        <!-- Slide 3: Thương Hiệu Nổi Bật -->
+        <!-- Slide 3 -->
         <div class="carousel-item">
-            <div class="carousel-slide-wrapper" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); min-height: 400px; position: relative; overflow: hidden;">
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-lg-6 text-white py-5">
-                            <h1 class="display-4 fw-bold mb-3">Thương Hiệu Hàng Đầu</h1>
-                            <p class="lead mb-4">iPhone, Samsung, Xiaomi, OPPO và nhiều thương hiệu uy tín khác</p>
-                            <div class="d-flex flex-wrap gap-2 mb-4">
-                                <span class="badge bg-white text-dark px-3 py-2">Apple</span>
-                                <span class="badge bg-white text-dark px-3 py-2">Samsung</span>
-                                <span class="badge bg-white text-dark px-3 py-2">Xiaomi</span>
-                                <span class="badge bg-white text-dark px-3 py-2">OPPO</span>
-                            </div>
-                            <a href="<?= BASE_URL ?>product/index" class="btn btn-light btn-lg px-4">
-                                <i class="bi bi-award-fill me-2"></i> Khám Phá Ngay
-                            </a>
-                        </div>
-                        <div class="col-lg-6 text-center">
-                            <img src="<?= BASE_URL ?>public/images/banner3.jpg" alt="Thương hiệu" class="img-fluid rounded shadow-lg" style="max-height: 350px; object-fit: cover;" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <a href="<?= BASE_URL ?>product/index">
+                <img src="<?= BASE_URL ?>public/images/banner3.jpg" class="d-block w-100" alt="Banner 3" 
+                     style="height: 400px; object-fit: cover;"
+                     onerror="this.src='https://images.unsplash.com/photo-1556656793-08538906a9f8?w=1200&q=80'">
+            </a>
         </div>
     </div>
     <button class="carousel-control-prev" type="button" data-bs-target="#homeHeroCarousel" data-bs-slide="prev">
@@ -197,26 +147,11 @@ $productModel = new ProductModel();
                         <div class="carousel-inner rounded overflow-hidden shadow-sm">
                             <!-- Slide 1: Samsung Galaxy S25 Ultra -->
                             <div class="carousel-item active">
-                                <div class="promo-slide samsung-banner" style="background: linear-gradient(180deg, #a78bfa 0%, #6b21a8 100%); padding: 25px 20px; min-height: 480px;">
-                                    <h4 class="text-white fw-bold mb-2" style="font-size: 1.4rem; line-height: 1.2;">SAMSUNG Galaxy S25 Ultra</h4>
-                                    <p class="text-white mb-3" style="font-size: 0.85rem; opacity: 0.95;">12GB 256GB</p>
-                                    <div class="d-flex align-items-center flex-wrap mb-3">
-                                        <span class="text-white fw-bold me-2" style="font-size: 1.6rem;">26.49</span>
-                                        <span class="text-white" style="font-size: 1rem;">Triệu</span>
-                                        <span class="badge bg-danger rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem;">Giảm 2 Triệu</span>
-                                    </div>
-                                    <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 1.7;">
-                                        <li class="mb-2">
-                                            <i class="bi bi-check-circle-fill me-2"></i>
-                                            Miễn phí 6 tháng + Google AI Pro
-                                        </li>
-                                        <li>
-                                            <i class="bi bi-check-circle-fill me-2"></i>
-                                            S-Student | S-Teacher Giảm thêm 7% tối đa 700K
-                                        </li>
-                                    </ul>
-                                    <a href="<?= BASE_URL ?>product/search?keyword=Samsung+Galaxy+S25" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
-                                </div>
+                                <a href="<?= BASE_URL ?>product/search?keyword=Samsung+Galaxy+S25" class="d-block">
+                                    <img src="<?= BASE_URL ?>public/images/promo-samsung.jpg" class="d-block w-100" alt="Samsung Galaxy S25" 
+                                         style="height: 520px; object-fit: cover;"
+                                         onerror="this.src='https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400&q=80'">
+                                </a>
                                 <div class="text-center p-2 bg-white border-top">
                                     <span class="text-dark fw-semibold" style="font-size: 0.9rem;">Galaxy S25</span>
                                 </div>
@@ -224,25 +159,11 @@ $productModel = new ProductModel();
                             
                             <!-- Slide 2: OPPO Find X9 -->
                             <div class="carousel-item">
-                                <div class="promo-slide oppo-banner" style="background: linear-gradient(180deg, #ec4899 0%, #be185d 100%); padding: 25px 20px; min-height: 480px;">
-                                    <h4 class="text-white fw-bold mb-2" style="font-size: 1.3rem; line-height: 1.2;">OPPO AI Phone Find X9 Series</h4>
-                                    <p class="text-white mb-3" style="font-size: 0.85rem; opacity: 0.95;">HASSELBLAD</p>
-                                    <div class="mb-3">
-                                        <p class="text-white mb-1" style="font-size: 0.9rem;">
-                                            Giá chỉ từ: <strong style="font-size: 1.1rem;">22.990.000₫</strong>
-                                        </p>
-                                        <p class="text-white mb-0" style="font-size: 0.85rem; opacity: 0.95;">
-                                            Bộ Quà Tặng Trị Giá 10.000.000₫
-                                        </p>
-                                    </div>
-                                    <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.8rem; line-height: 1.6;">
-                                        <li class="mb-1"><i class="bi bi-check-circle-fill me-2"></i>Premium Service</li>
-                                        <li class="mb-1"><i class="bi bi-check-circle-fill me-2"></i>Bảo Hành 24 Tháng</li>
-                                        <li class="mb-1"><i class="bi bi-check-circle-fill me-2"></i>Bảo Hiểm Màn Hình 12 Tháng</li>
-                                        <li><i class="bi bi-check-circle-fill me-2"></i>Bảo Hành Tận Nơi Toàn Cầu</li>
-                                    </ul>
-                                    <a href="<?= BASE_URL ?>product/search?keyword=OPPO+Find" class="btn btn-danger w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
-                                </div>
+                                <a href="<?= BASE_URL ?>product/search?keyword=OPPO+Find" class="d-block">
+                                    <img src="<?= BASE_URL ?>public/images/promo-oppo.jpg" class="d-block w-100" alt="OPPO Find X9" 
+                                         style="height: 520px; object-fit: cover;"
+                                         onerror="this.src='https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80'">
+                                </a>
                                 <div class="text-center p-2 bg-white border-top">
                                     <span class="text-dark fw-semibold" style="font-size: 0.9rem;">OPPO Find X9</span>
                                 </div>
@@ -250,21 +171,11 @@ $productModel = new ProductModel();
                             
                             <!-- Slide 3: iPhone 16 Pro -->
                             <div class="carousel-item">
-                                <div class="promo-slide iphone-banner" style="background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%); padding: 25px 20px; min-height: 480px;">
-                                    <h4 class="text-white fw-bold mb-2" style="font-size: 1.4rem; line-height: 1.2;">iPhone 16 Pro Max</h4>
-                                    <p class="text-white mb-3" style="font-size: 0.85rem; opacity: 0.95;">256GB | Titan Đen</p>
-                                    <div class="d-flex align-items-center flex-wrap mb-3">
-                                        <span class="text-white fw-bold me-2" style="font-size: 1.6rem;">34.99</span>
-                                        <span class="text-white" style="font-size: 1rem;">Triệu</span>
-                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1 ms-2" style="font-size: 0.75rem;">Trả góp 0%</span>
-                                    </div>
-                                    <ul class="text-white mb-4" style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 1.7;">
-                                        <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Apple Intelligence</li>
-                                        <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i>Camera Control mới</li>
-                                        <li><i class="bi bi-check-circle-fill me-2"></i>Chip A18 Pro mạnh mẽ</li>
-                                    </ul>
-                                    <a href="<?= BASE_URL ?>product/search?keyword=iPhone+16" class="btn btn-light w-100 fw-bold py-2" style="font-size: 0.95rem; border-radius: 8px;">MUA NGAY</a>
-                                </div>
+                                <a href="<?= BASE_URL ?>product/search?keyword=iPhone+16" class="d-block">
+                                    <img src="<?= BASE_URL ?>public/images/promo-iphone.jpg" class="d-block w-100" alt="iPhone 16 Pro" 
+                                         style="height: 520px; object-fit: cover;"
+                                         onerror="this.src='https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&q=80'">
+                                </a>
                                 <div class="text-center p-2 bg-white border-top">
                                     <span class="text-dark fw-semibold" style="font-size: 0.9rem;">iPhone 16 Pro</span>
                                 </div>
@@ -404,27 +315,19 @@ $productModel = new ProductModel();
 }
 
 .home-hero-carousel .carousel-item {
-    min-height: 400px;
+    height: 400px;
 }
 
-.carousel-slide-wrapper {
-    position: relative;
+.home-hero-carousel .carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.carousel-slide-wrapper::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.1);
-    z-index: 1;
-}
-
-.carousel-slide-wrapper .container {
-    position: relative;
-    z-index: 2;
+@media (max-width: 768px) {
+    .home-hero-carousel .carousel-item {
+        height: 250px;
+    }
 }
 
 .home-hero-carousel .carousel-control-prev,
