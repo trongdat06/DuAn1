@@ -1,5 +1,5 @@
 <?php
-require_once 'BaseModel.php';
+// BaseModel đã được load từ index.php
 
 class ReviewModel extends BaseModel {
     

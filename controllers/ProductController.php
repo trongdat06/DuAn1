@@ -1,7 +1,5 @@
 <?php
-require_once 'BaseController.php';
-require_once 'models/ProductModel.php';
-require_once 'models/ReviewModel.php';
+// Các class đã được load từ index.php
 
 class ProductController extends BaseController {
     

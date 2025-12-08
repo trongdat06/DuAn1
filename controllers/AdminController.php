@@ -1,10 +1,5 @@
 <?php
-require_once 'BaseController.php';
-require_once 'models/AdminModel.php';
-require_once 'models/ProductModel.php';
-require_once 'models/CustomerModel.php';
-require_once 'models/OrderModel.php';
-require_once 'models/ReviewModel.php';
+// Các class đã được load từ index.php
 
 class AdminController extends BaseController {
     

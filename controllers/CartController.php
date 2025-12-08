@@ -1,9 +1,5 @@
 <?php
-require_once 'BaseController.php';
-require_once 'models/CartModel.php';
-require_once 'models/ProductModel.php';
-require_once 'models/CustomerModel.php';
-require_once 'models/OrderModel.php';
+// Các class đã được load từ index.php
 
 class CartController extends BaseController {
     
