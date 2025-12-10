@@ -8,6 +8,8 @@ class AdminController extends BaseController {
     private $customerModel;
     private $orderModel;
     private $reviewModel;
+    private $couponModel;
+    private $postModel;
     
     public function __construct() {
         $this->checkAuth();
@@ -16,6 +18,8 @@ class AdminController extends BaseController {
         $this->customerModel = new CustomerModel();
         $this->orderModel = new OrderModel();
         $this->reviewModel = new ReviewModel();
+        $this->couponModel = new CouponModel();
+        $this->postModel = new PostModel();
     }
     
     private function checkAuth() {
@@ -521,6 +525,369 @@ class AdminController extends BaseController {
             $_SESSION['error'] = 'Không thể xóa đánh giá';
         }
         $this->redirect('admin/reviews');
+    }
+    
+    // Quản lý mã giảm giá
+    public function coupons() {
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 10;
+        
+        $coupons = $this->couponModel->getAllCoupons($page, $limit);
+        $totalCoupons = $this->couponModel->countCoupons();
+        $totalPages = ceil($totalCoupons / $limit);
+        
+        $data = [
+            'coupons' => $coupons,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'pageTitle' => 'Quản Lý Mã Giảm Giá'
+        ];
+        
+        $this->view('admin/coupons/index', $data, true);
+    }
+    
+    public function couponCreate() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'code' => strtoupper(trim($_POST['code'])),
+                'description' => $_POST['description'] ?? '',
+                'discount_type' => $_POST['discount_type'],
+                'discount_value' => (float)$_POST['discount_value'],
+                'min_order_amount' => !empty($_POST['min_order_amount']) ? (float)$_POST['min_order_amount'] : 0,
+                'max_discount_amount' => !empty($_POST['max_discount_amount']) ? (float)$_POST['max_discount_amount'] : null,
+                'usage_limit' => !empty($_POST['usage_limit']) ? (int)$_POST['usage_limit'] : null,
+                'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : null,
+                'end_date' => !empty($_POST['end_date']) ? $_POST['end_date'] : null,
+                'is_active' => isset($_POST['is_active']) ? 1 : 0
+            ];
+            
+            // Validate
+            if (empty($data['code'])) {
+                $_SESSION['error'] = 'Vui lòng nhập mã giảm giá';
+                $this->redirect('admin/couponCreate');
+                return;
+            }
+            
+            if ($data['discount_value'] <= 0) {
+                $_SESSION['error'] = 'Giá trị giảm giá phải lớn hơn 0';
+                $this->redirect('admin/couponCreate');
+                return;
+            }
+            
+            // Check duplicate code
+            $existing = $this->couponModel->getCouponByCode($data['code']);
+            if ($existing) {
+                $_SESSION['error'] = 'Mã giảm giá đã tồn tại';
+                $this->redirect('admin/couponCreate');
+                return;
+            }
+            
+            if ($this->couponModel->createCoupon($data)) {
+                $_SESSION['success'] = 'Tạo mã giảm giá thành công';
+                $this->redirect('admin/coupons');
+            } else {
+                $_SESSION['error'] = 'Không thể tạo mã giảm giá';
+            }
+        }
+        
+        $data = [
+            'pageTitle' => 'Thêm Mã Giảm Giá'
+        ];
+        
+        $this->view('admin/coupons/create', $data, true);
+    }
+    
+    public function couponEdit($id) {
+        $coupon = $this->couponModel->getCouponById($id);
+        
+        if (!$coupon) {
+            $_SESSION['error'] = 'Mã giảm giá không tồn tại';
+            $this->redirect('admin/coupons');
+            return;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'code' => strtoupper(trim($_POST['code'])),
+                'description' => $_POST['description'] ?? '',
+                'discount_type' => $_POST['discount_type'],
+                'discount_value' => (float)$_POST['discount_value'],
+                'min_order_amount' => !empty($_POST['min_order_amount']) ? (float)$_POST['min_order_amount'] : 0,
+                'max_discount_amount' => !empty($_POST['max_discount_amount']) ? (float)$_POST['max_discount_amount'] : null,
+                'usage_limit' => !empty($_POST['usage_limit']) ? (int)$_POST['usage_limit'] : null,
+                'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : null,
+                'end_date' => !empty($_POST['end_date']) ? $_POST['end_date'] : null,
+                'is_active' => isset($_POST['is_active']) ? 1 : 0
+            ];
+            
+            // Check duplicate code (exclude current)
+            $existing = $this->couponModel->getCouponByCode($data['code']);
+            if ($existing && $existing['coupon_id'] != $id) {
+                $_SESSION['error'] = 'Mã giảm giá đã tồn tại';
+                $this->redirect('admin/couponEdit/' . $id);
+                return;
+            }
+            
+            if ($this->couponModel->updateCoupon($id, $data)) {
+                $_SESSION['success'] = 'Cập nhật mã giảm giá thành công';
+                $this->redirect('admin/coupons');
+            } else {
+                $_SESSION['error'] = 'Không thể cập nhật mã giảm giá';
+            }
+        }
+        
+        $data = [
+            'coupon' => $coupon,
+            'pageTitle' => 'Sửa Mã Giảm Giá'
+        ];
+        
+        $this->view('admin/coupons/edit', $data, true);
+    }
+    
+    public function couponDelete($id) {
+        if ($this->couponModel->deleteCoupon($id)) {
+            $_SESSION['success'] = 'Xóa mã giảm giá thành công';
+        } else {
+            $_SESSION['error'] = 'Không thể xóa mã giảm giá';
+        }
+        $this->redirect('admin/coupons');
+    }
+    
+    public function couponToggle($id) {
+        if ($this->couponModel->toggleCouponStatus($id)) {
+            $_SESSION['success'] = 'Cập nhật trạng thái thành công';
+        } else {
+            $_SESSION['error'] = 'Không thể cập nhật trạng thái';
+        }
+        $this->redirect('admin/coupons');
+    }
+    
+    // ========== QUẢN LÝ BÀI VIẾT ==========
+    
+    public function posts() {
+        $statusFilter = $_GET['status'] ?? '';
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        
+        $posts = $this->postModel->getAllPosts($statusFilter ?: null, $limit, $offset);
+        $totalPosts = $this->postModel->countPosts($statusFilter ?: null);
+        $totalPages = ceil($totalPosts / $limit);
+        $categories = $this->postModel->getAllCategories();
+        
+        $data = [
+            'posts' => $posts,
+            'categories' => $categories,
+            'statusFilter' => $statusFilter,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'pageTitle' => 'Quản Lý Bài Viết'
+        ];
+        
+        $this->view('admin/posts/index', $data, true);
+    }
+    
+    public function postCreate() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = trim($_POST['title']);
+            $slug = !empty($_POST['slug']) ? trim($_POST['slug']) : $this->postModel->generateSlug($title);
+            
+            // Xử lý upload thumbnail
+            $thumbnail = null;
+            if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
+                $thumbnail = $this->uploadPostThumbnail($_FILES['thumbnail'], $slug);
+            }
+            
+            $data = [
+                'title' => $title,
+                'slug' => $slug,
+                'excerpt' => trim($_POST['excerpt'] ?? ''),
+                'content' => $_POST['content'] ?? '',
+                'thumbnail' => $thumbnail,
+                'category_id' => !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null,
+                'author_id' => $_SESSION['admin_id'],
+                'status' => $_POST['status'] ?? 'draft',
+                'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
+                'published_at' => $_POST['status'] === 'published' ? date('Y-m-d H:i:s') : null
+            ];
+            
+            if (empty($data['title'])) {
+                $_SESSION['error'] = 'Vui lòng nhập tiêu đề bài viết';
+                $this->redirect('admin/postCreate');
+                return;
+            }
+            
+            if ($this->postModel->slugExists($data['slug'])) {
+                $data['slug'] = $this->postModel->generateSlug($data['title']);
+            }
+            
+            if ($this->postModel->createPost($data)) {
+                $_SESSION['success'] = 'Tạo bài viết thành công';
+                $this->redirect('admin/posts');
+            } else {
+                $_SESSION['error'] = 'Không thể tạo bài viết';
+            }
+        }
+        
+        $categories = $this->postModel->getAllCategories();
+        $data = [
+            'categories' => $categories,
+            'pageTitle' => 'Thêm Bài Viết'
+        ];
+        
+        $this->view('admin/posts/create', $data, true);
+    }
+    
+    public function postEdit($id) {
+        $post = $this->postModel->getPostById($id);
+        
+        if (!$post) {
+            $_SESSION['error'] = 'Bài viết không tồn tại';
+            $this->redirect('admin/posts');
+            return;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = trim($_POST['title']);
+            $slug = !empty($_POST['slug']) ? trim($_POST['slug']) : $this->postModel->generateSlug($title);
+            
+            // Xử lý upload thumbnail mới
+            $thumbnail = $post['thumbnail'];
+            if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
+                $thumbnail = $this->uploadPostThumbnail($_FILES['thumbnail'], $slug);
+            }
+            
+            $data = [
+                'title' => $title,
+                'slug' => $slug,
+                'excerpt' => trim($_POST['excerpt'] ?? ''),
+                'content' => $_POST['content'] ?? '',
+                'thumbnail' => $thumbnail,
+                'category_id' => !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null,
+                'status' => $_POST['status'] ?? 'draft',
+                'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
+                'published_at' => $_POST['status'] === 'published' && !$post['published_at'] ? date('Y-m-d H:i:s') : $post['published_at']
+            ];
+            
+            if ($this->postModel->slugExists($data['slug'], $id)) {
+                $_SESSION['error'] = 'Slug đã tồn tại';
+                $this->redirect('admin/postEdit/' . $id);
+                return;
+            }
+            
+            if ($this->postModel->updatePost($id, $data)) {
+                $_SESSION['success'] = 'Cập nhật bài viết thành công';
+                $this->redirect('admin/posts');
+            } else {
+                $_SESSION['error'] = 'Không thể cập nhật bài viết';
+            }
+        }
+        
+        $categories = $this->postModel->getAllCategories();
+        $data = [
+            'post' => $post,
+            'categories' => $categories,
+            'pageTitle' => 'Sửa Bài Viết'
+        ];
+        
+        $this->view('admin/posts/edit', $data, true);
+    }
+    
+    public function postDelete($id) {
+        if ($this->postModel->deletePost($id)) {
+            $_SESSION['success'] = 'Xóa bài viết thành công';
+        } else {
+            $_SESSION['error'] = 'Không thể xóa bài viết';
+        }
+        $this->redirect('admin/posts');
+    }
+    
+    private function uploadPostThumbnail($file, $slug) {
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mimeType, $allowedTypes)) {
+            return null;
+        }
+        
+        $uploadDir = __DIR__ . '/../public/images/posts/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $fileName = $slug . '-' . time() . '.' . $extension;
+        $targetPath = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            return 'public/images/posts/' . $fileName;
+        }
+        
+        return null;
+    }
+    
+    // ========== DANH MỤC BÀI VIẾT ==========
+    
+    public function postCategories() {
+        $categories = $this->postModel->getAllCategories();
+        
+        $data = [
+            'categories' => $categories,
+            'pageTitle' => 'Danh Mục Bài Viết'
+        ];
+        
+        $this->view('admin/posts/categories', $data, true);
+    }
+    
+    public function postCategoryCreate() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name']);
+            $slug = !empty($_POST['slug']) ? trim($_POST['slug']) : $this->postModel->generateSlug($name);
+            
+            $data = [
+                'name' => $name,
+                'slug' => $slug,
+                'description' => trim($_POST['description'] ?? '')
+            ];
+            
+            if ($this->postModel->createCategory($data)) {
+                $_SESSION['success'] = 'Tạo danh mục thành công';
+            } else {
+                $_SESSION['error'] = 'Không thể tạo danh mục';
+            }
+        }
+        $this->redirect('admin/postCategories');
+    }
+    
+    public function postCategoryEdit($id) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name']);
+            $slug = !empty($_POST['slug']) ? trim($_POST['slug']) : $this->postModel->generateSlug($name);
+            
+            $data = [
+                'name' => $name,
+                'slug' => $slug,
+                'description' => trim($_POST['description'] ?? '')
+            ];
+            
+            if ($this->postModel->updateCategory($id, $data)) {
+                $_SESSION['success'] = 'Cập nhật danh mục thành công';
+            } else {
+                $_SESSION['error'] = 'Không thể cập nhật danh mục';
+            }
+        }
+        $this->redirect('admin/postCategories');
+    }
+    
+    public function postCategoryDelete($id) {
+        if ($this->postModel->deleteCategory($id)) {
+            $_SESSION['success'] = 'Xóa danh mục thành công';
+        } else {
+            $_SESSION['error'] = 'Không thể xóa danh mục';
+        }
+        $this->redirect('admin/postCategories');
     }
 }
 ?>

@@ -7,12 +7,14 @@ class CartController extends BaseController {
     private $productModel;
     private $customerModel;
     private $orderModel;
+    private $couponModel;
     
     public function __construct() {
         $this->cartModel = new CartModel();
         $this->productModel = new ProductModel();
         $this->customerModel = new CustomerModel();
         $this->orderModel = new OrderModel();
+        $this->couponModel = new CouponModel();
     }
     
     public function index() {
@@ -319,13 +321,43 @@ class CartController extends BaseController {
             $this->redirect('cart/checkout');
         }
         
+        // Xử lý mã giảm giá
+        $discountAmount = 0;
+        $couponId = null;
+        $appliedCoupon = null;
+        
+        if (isset($_SESSION['applied_coupon'])) {
+            $appliedCoupon = $_SESSION['applied_coupon'];
+            $couponId = $appliedCoupon['coupon_id'];
+            
+            // Validate lại mã giảm giá
+            $couponResult = $this->couponModel->validateCoupon($appliedCoupon['code'], $total, $customerId);
+            if ($couponResult['valid']) {
+                $discountAmount = $couponResult['discount_amount'];
+            } else {
+                // Mã không còn hợp lệ
+                unset($_SESSION['applied_coupon']);
+                $couponId = null;
+            }
+        }
+        
+        // Tính tổng sau giảm giá
+        $finalTotal = $total - $discountAmount;
+        if ($finalTotal < 0) $finalTotal = 0;
+        
         // Tạo đơn hàng
         $paymentMethod = $_POST['payment_method'] ?? 'Tiền mặt';
         $note = $_POST['note'] ?? '';
         
-        $orderId = $this->orderModel->createOrder($customerId, $total, $paymentMethod, $note);
+        $orderId = $this->orderModel->createOrder($customerId, $finalTotal, $paymentMethod, $note, $couponId, $discountAmount);
         
         if ($orderId) {
+            // Ghi nhận sử dụng mã giảm giá
+            if ($couponId && $discountAmount > 0) {
+                $this->couponModel->recordCouponUsage($couponId, $customerId, $orderId, $discountAmount);
+                unset($_SESSION['applied_coupon']);
+            }
+            
             // Tạo chi tiết đơn hàng
             foreach ($cartItems as $item) {
                 $this->orderModel->createOrderDetail(
@@ -505,6 +537,85 @@ class CartController extends BaseController {
             'cart' => $cart,
             'cartCount' => $this->cartModel->getCartCount()
         ]);
+    }
+    
+    // Áp dụng mã giảm giá
+    public function applyCoupon() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonResponse(['success' => false, 'message' => 'Invalid request'], 400);
+            return;
+        }
+        
+        $code = trim($_POST['coupon_code'] ?? '');
+        
+        if (empty($code)) {
+            $this->jsonResponse(['success' => false, 'message' => 'Vui lòng nhập mã giảm giá']);
+            return;
+        }
+        
+        // Lấy tổng tiền giỏ hàng
+        $isBuyNow = isset($_POST['is_buy_now']) && $_POST['is_buy_now'] == '1';
+        
+        if ($isBuyNow && isset($_SESSION['buy_now_item'])) {
+            $buyNowItem = $_SESSION['buy_now_item'];
+            $variant = $this->productModel->getVariantById($buyNowItem['variant_id']);
+            $total = $variant ? $variant['price'] * $buyNowItem['quantity'] : 0;
+        } else {
+            $total = $this->cartModel->getCartTotal();
+        }
+        
+        if ($total <= 0) {
+            $this->jsonResponse(['success' => false, 'message' => 'Giỏ hàng trống']);
+            return;
+        }
+        
+        // Validate mã giảm giá
+        $customerId = $_SESSION['customer_id'] ?? null;
+        $result = $this->couponModel->validateCoupon($code, $total, $customerId);
+        
+        if ($result['valid']) {
+            // Lưu mã giảm giá vào session
+            $_SESSION['applied_coupon'] = [
+                'coupon_id' => $result['coupon']['coupon_id'],
+                'code' => $result['coupon']['code'],
+                'discount_amount' => $result['discount_amount'],
+                'discount_type' => $result['coupon']['discount_type'],
+                'discount_value' => $result['coupon']['discount_value']
+            ];
+            
+            $this->jsonResponse([
+                'success' => true,
+                'message' => $result['message'],
+                'discount_amount' => $result['discount_amount'],
+                'discount_formatted' => number_format($result['discount_amount'], 0, ',', '.') . '₫',
+                'new_total' => $total - $result['discount_amount'],
+                'new_total_formatted' => number_format($total - $result['discount_amount'], 0, ',', '.') . '₫',
+                'coupon' => [
+                    'code' => $result['coupon']['code'],
+                    'description' => $result['coupon']['description']
+                ]
+            ]);
+        } else {
+            $this->jsonResponse(['success' => false, 'message' => $result['message']]);
+        }
+    }
+    
+    // Xóa mã giảm giá đã áp dụng
+    public function removeCoupon() {
+        if (isset($_SESSION['applied_coupon'])) {
+            unset($_SESSION['applied_coupon']);
+        }
+        
+        if (isset($_POST['ajax']) || isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            $this->jsonResponse([
+                'success' => true,
+                'message' => 'Đã xóa mã giảm giá'
+            ]);
+            return;
+        }
+        
+        $_SESSION['success'] = 'Đã xóa mã giảm giá';
+        $this->redirect('cart/checkout');
     }
     
     // Đồng bộ giỏ hàng từ localStorage lên session

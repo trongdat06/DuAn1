@@ -54,6 +54,18 @@
                     <span>Đánh Giá</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/coupons">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Mã Giảm Giá</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= BASE_URL ?>admin/posts">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Bài Viết</span>
+                </a>
+            </li>
         </ul>
         <div class="sidebar-footer">
             <a class="nav-link" href="<?= BASE_URL ?>home/index">

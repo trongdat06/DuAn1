@@ -363,24 +363,65 @@ textarea:focus {
                     
                     <hr>
                     
+                    <!-- Coupon Code -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-ticket-perforated me-1"></i> Mã Giảm Giá
+                        </label>
+                        <div id="coupon-form">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="coupon_code" 
+                                       placeholder="Nhập mã giảm giá" 
+                                       value="<?= isset($_SESSION['applied_coupon']) ? htmlspecialchars($_SESSION['applied_coupon']['code']) : '' ?>"
+                                       <?= isset($_SESSION['applied_coupon']) ? 'readonly' : '' ?>>
+                                <?php if (isset($_SESSION['applied_coupon'])): ?>
+                                    <button type="button" class="btn btn-outline-danger" id="btn-remove-coupon">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" class="btn btn-outline-danger" id="btn-apply-coupon">
+                                        Áp dụng
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                            <div id="coupon-message" class="small mt-2">
+                                <?php if (isset($_SESSION['applied_coupon'])): ?>
+                                    <span class="text-success">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Đã áp dụng mã giảm giá
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
                     <!-- Summary -->
+                    <?php 
+                        $discountAmount = isset($_SESSION['applied_coupon']) ? $_SESSION['applied_coupon']['discount_amount'] : 0;
+                        $finalTotal = $total - $discountAmount;
+                        if ($finalTotal < 0) $finalTotal = 0;
+                    ?>
                     <div class="summary-item">
                         <span class="text-muted">Tạm tính:</span>
-                        <span class="fw-bold"><?= number_format($total, 0, ',', '.') ?>₫</span>
+                        <span class="fw-bold" id="subtotal-display"><?= number_format($total, 0, ',', '.') ?>₫</span>
                     </div>
                     <div class="summary-item">
                         <span class="text-muted">Phí vận chuyển:</span>
                         <span class="fw-bold text-success">Miễn phí</span>
                     </div>
-                    <div class="summary-item">
+                    <div class="summary-item" id="discount-row" style="<?= $discountAmount > 0 ? '' : 'display:none;' ?>">
                         <span class="text-muted">Giảm giá:</span>
-                        <span class="fw-bold text-success">-0₫</span>
+                        <span class="fw-bold text-success" id="discount-display">-<?= number_format($discountAmount, 0, ',', '.') ?>₫</span>
                     </div>
                     <hr>
                     <div class="summary-item">
                         <span class="fw-bold fs-5">Tổng cộng:</span>
-                        <span class="summary-total"><?= number_format($total, 0, ',', '.') ?>₫</span>
+                        <span class="summary-total" id="total-display"><?= number_format($finalTotal, 0, ',', '.') ?>₫</span>
                     </div>
+                    <input type="hidden" id="original-total" value="<?= $total ?>">
+                    <input type="hidden" id="is-buy-now" value="<?= isset($isBuyNow) && $isBuyNow ? '1' : '0' ?>">
                     
                     <!-- Info Box -->
                     <div class="alert alert-info mt-4 mb-0 small">
@@ -413,6 +454,154 @@ $(document).ready(function() {
         radio.prop('checked', true);
         $('.payment-option label').removeClass('border-danger');
         $(this).addClass('border-danger');
+    });
+    
+    // Apply coupon
+    $('#btn-apply-coupon').on('click', function() {
+        var code = $('#coupon_code').val().trim();
+        if (!code) {
+            showCouponMessage('Vui lòng nhập mã giảm giá', 'warning');
+            return;
+        }
+        
+        var btn = $(this);
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+        
+        $.ajax({
+            url: '<?= BASE_URL ?>cart/applyCoupon',
+            method: 'POST',
+            data: {
+                coupon_code: code,
+                is_buy_now: $('#is-buy-now').val(),
+                ajax: 1
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    showCouponMessage('<i class="bi bi-check-circle me-1"></i>' + response.message, 'success');
+                    $('#coupon_code').prop('readonly', true);
+                    btn.removeClass('btn-outline-danger').addClass('btn-outline-danger')
+                       .attr('id', 'btn-remove-coupon').html('<i class="bi bi-x-lg"></i>');
+                    
+                    // Update display
+                    $('#discount-row').show();
+                    $('#discount-display').text('-' + response.discount_formatted);
+                    $('#total-display').text(response.new_total_formatted);
+                    
+                    // Rebind remove button
+                    bindRemoveCoupon();
+                } else {
+                    showCouponMessage('<i class="bi bi-exclamation-circle me-1"></i>' + response.message, 'danger');
+                    btn.prop('disabled', false).html('Áp dụng');
+                }
+            },
+            error: function() {
+                showCouponMessage('Có lỗi xảy ra, vui lòng thử lại', 'danger');
+                btn.prop('disabled', false).html('Áp dụng');
+            }
+        });
+    });
+    
+    // Remove coupon
+    function bindRemoveCoupon() {
+        $('#btn-remove-coupon').off('click').on('click', function() {
+            var btn = $(this);
+            btn.prop('disabled', true);
+            
+            $.ajax({
+                url: '<?= BASE_URL ?>cart/removeCoupon',
+                method: 'POST',
+                data: { ajax: 1 },
+                dataType: 'json',
+                success: function(response) {
+                    $('#coupon_code').val('').prop('readonly', false);
+                    btn.attr('id', 'btn-apply-coupon').html('Áp dụng').prop('disabled', false);
+                    showCouponMessage('', '');
+                    
+                    // Reset display
+                    $('#discount-row').hide();
+                    var originalTotal = parseInt($('#original-total').val());
+                    $('#total-display').text(formatNumber(originalTotal) + '₫');
+                    
+                    // Rebind apply button
+                    bindApplyCoupon();
+                },
+                error: function() {
+                    btn.prop('disabled', false);
+                }
+            });
+        });
+    }
+    
+    function bindApplyCoupon() {
+        $('#btn-apply-coupon').off('click').on('click', function() {
+            var code = $('#coupon_code').val().trim();
+            if (!code) {
+                showCouponMessage('Vui lòng nhập mã giảm giá', 'warning');
+                return;
+            }
+            
+            var btn = $(this);
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+            
+            $.ajax({
+                url: '<?= BASE_URL ?>cart/applyCoupon',
+                method: 'POST',
+                data: {
+                    coupon_code: code,
+                    is_buy_now: $('#is-buy-now').val(),
+                    ajax: 1
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        showCouponMessage('<i class="bi bi-check-circle me-1"></i>' + response.message, 'success');
+                        $('#coupon_code').prop('readonly', true);
+                        btn.attr('id', 'btn-remove-coupon').html('<i class="bi bi-x-lg"></i>').prop('disabled', false);
+                        
+                        $('#discount-row').show();
+                        $('#discount-display').text('-' + response.discount_formatted);
+                        $('#total-display').text(response.new_total_formatted);
+                        
+                        bindRemoveCoupon();
+                    } else {
+                        showCouponMessage('<i class="bi bi-exclamation-circle me-1"></i>' + response.message, 'danger');
+                        btn.prop('disabled', false).html('Áp dụng');
+                    }
+                },
+                error: function() {
+                    showCouponMessage('Có lỗi xảy ra, vui lòng thử lại', 'danger');
+                    btn.prop('disabled', false).html('Áp dụng');
+                }
+            });
+        });
+    }
+    
+    // Initial bind
+    bindRemoveCoupon();
+    
+    function showCouponMessage(message, type) {
+        var msgDiv = $('#coupon-message');
+        if (!message) {
+            msgDiv.html('');
+            return;
+        }
+        var colorClass = type === 'success' ? 'text-success' : (type === 'danger' ? 'text-danger' : 'text-warning');
+        msgDiv.html('<span class="' + colorClass + '">' + message + '</span>');
+    }
+    
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+    
+    // Enter key on coupon input
+    $('#coupon_code').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            if (!$(this).prop('readonly')) {
+                $('#btn-apply-coupon').click();
+            }
+        }
     });
     
     // Form validation

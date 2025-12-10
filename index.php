@@ -10,6 +10,8 @@ require_once __DIR__ . '/models/CartModel.php';
 require_once __DIR__ . '/models/CustomerModel.php';
 require_once __DIR__ . '/models/ContactModel.php';
 require_once __DIR__ . '/models/ReviewModel.php';
+require_once __DIR__ . '/models/CouponModel.php';
+require_once __DIR__ . '/models/PostModel.php';
 
 require_once __DIR__ . '/controllers/BaseController.php';
 require_once __DIR__ . '/controllers/HomeController.php';

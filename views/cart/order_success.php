@@ -74,6 +74,23 @@
                         <?php endforeach; ?>
                     </tbody>
                     <tfoot>
+                        <?php 
+                            $subtotal = 0;
+                            foreach ($orderDetails as $detail) {
+                                $subtotal += $detail['subtotal'];
+                            }
+                            $discountAmount = isset($order['discount_amount']) ? $order['discount_amount'] : 0;
+                        ?>
+                        <tr>
+                            <td colspan="3" class="text-end">Tạm tính:</td>
+                            <td><?= number_format($subtotal, 0, ',', '.') ?> đ</td>
+                        </tr>
+                        <?php if ($discountAmount > 0): ?>
+                        <tr class="text-success">
+                            <td colspan="3" class="text-end">Giảm giá:</td>
+                            <td>-<?= number_format($discountAmount, 0, ',', '.') ?> đ</td>
+                        </tr>
+                        <?php endif; ?>
                         <tr>
                             <td colspan="3" class="text-end"><strong>Tổng Tiền:</strong></td>
                             <td class="fw-bold text-primary"><?= number_format($order['total_amount'], 0, ',', '.') ?> đ</td>

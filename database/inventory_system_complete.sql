@@ -614,3 +614,127 @@ INSERT INTO Product_Logs (variant_id, employee_id, action_type, old_data, new_da
 (26, 5, 'CREATE', NULL, 'Samsung Z Fold 5 256GB', '2024-11-05 13:00:00', 'Tạo variant mới'),
 (28, 5, 'UPDATE_STOCK', '5', '7', '2024-11-05 13:30:00', 'Nhập thêm hàng');
 
+
+
+-- ============================================
+-- PHẦN 3: CÁC BẢNG BỔ SUNG
+-- ============================================
+
+-- 25. BẢNG CONTACTS (Liên hệ)
+CREATE TABLE IF NOT EXISTS `contacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_is_read` (`is_read`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 26. BẢNG PRODUCT_REVIEWS (Đánh giá sản phẩm)
+CREATE TABLE IF NOT EXISTS `Product_Reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `rating` int(1) NOT NULL DEFAULT 5,
+  `comment` text,
+  `status` varchar(20) DEFAULT 'pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`review_id`),
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_customer_id` (`customer_id`),
+  KEY `idx_status` (`status`),
+  CONSTRAINT `fk_review_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_review_customer` FOREIGN KEY (`customer_id`) REFERENCES `Customers` (`customer_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 27. BẢNG COUPONS (Mã giảm giá)
+CREATE TABLE IF NOT EXISTS coupons (
+    coupon_id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    discount_type ENUM('percentage', 'fixed') NOT NULL DEFAULT 'percentage',
+    discount_value DECIMAL(15, 2) NOT NULL,
+    min_order_amount DECIMAL(15, 2) DEFAULT 0,
+    max_discount_amount DECIMAL(15, 2) DEFAULT NULL,
+    usage_limit INT DEFAULT NULL,
+    used_count INT DEFAULT 0,
+    start_date DATETIME DEFAULT NULL,
+    end_date DATETIME DEFAULT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS coupon_usage (
+    usage_id INT AUTO_INCREMENT PRIMARY KEY,
+    coupon_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    order_id INT NOT NULL,
+    discount_amount DECIMAL(15, 2) NOT NULL,
+    used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (coupon_id) REFERENCES coupons(coupon_id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Thêm cột coupon vào bảng orders (bỏ qua nếu đã tồn tại)
+-- Chạy từng lệnh riêng, bỏ qua lỗi nếu cột đã tồn tại
+ALTER TABLE Orders ADD COLUMN coupon_id INT DEFAULT NULL;
+ALTER TABLE Orders ADD COLUMN discount_amount DECIMAL(15, 2) DEFAULT 0;
+
+-- Mã giảm giá mẫu
+INSERT INTO coupons (code, description, discount_type, discount_value, min_order_amount, max_discount_amount, usage_limit, start_date, end_date) VALUES
+('WELCOME10', 'Giảm 10% cho khách hàng mới', 'percentage', 10, 500000, 200000, 100, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+('SALE50K', 'Giảm 50.000đ cho đơn từ 1 triệu', 'fixed', 50000, 1000000, NULL, 50, NOW(), DATE_ADD(NOW(), INTERVAL 15 DAY)),
+('FREESHIP', 'Giảm 30.000đ phí ship', 'fixed', 30000, 300000, NULL, NULL, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY)),
+('VIP20', 'Giảm 20% cho khách VIP', 'percentage', 20, 2000000, 500000, 20, NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY));
+
+-- 28. BẢNG POSTS (Bài viết)
+CREATE TABLE IF NOT EXISTS post_categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS posts (
+    post_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    excerpt TEXT,
+    content LONGTEXT,
+    thumbnail VARCHAR(255),
+    category_id INT,
+    author_id INT,
+    view_count INT DEFAULT 0,
+    status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+    is_featured TINYINT(1) DEFAULT 0,
+    published_at DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES post_categories(category_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Danh mục bài viết mẫu
+INSERT INTO post_categories (name, slug, description) VALUES
+('Tin tức', 'tin-tuc', 'Tin tức mới nhất về công nghệ'),
+('Đánh giá', 'danh-gia', 'Đánh giá sản phẩm chi tiết'),
+('Hướng dẫn', 'huong-dan', 'Hướng dẫn sử dụng sản phẩm'),
+('Khuyến mãi', 'khuyen-mai', 'Thông tin khuyến mãi, ưu đãi');
+
+-- Bài viết mẫu
+INSERT INTO posts (title, slug, excerpt, content, category_id, status, is_featured, published_at) VALUES
+('Chào mừng đến với cửa hàng', 'chao-mung-den-voi-cua-hang', 
+ 'Chào mừng bạn đến với cửa hàng điện thoại hàng đầu Việt Nam.',
+ '<p>Chào mừng bạn đến với cửa hàng của chúng tôi!</p><p>Chúng tôi cung cấp các sản phẩm điện thoại chính hãng với giá tốt nhất thị trường.</p>',
+ 1, 'published', 1, NOW()),
+('Hướng dẫn mua hàng online', 'huong-dan-mua-hang-online',
+ 'Hướng dẫn chi tiết cách mua hàng trực tuyến tại website.',
+ '<p>Bước 1: Chọn sản phẩm bạn muốn mua</p><p>Bước 2: Thêm vào giỏ hàng</p><p>Bước 3: Tiến hành thanh toán</p><p>Bước 4: Chờ nhận hàng</p>',
+ 3, 'published', 0, NOW());

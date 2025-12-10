@@ -3,14 +3,16 @@
 
 class OrderModel extends BaseModel {
     
-    public function createOrder($customerId, $totalAmount, $paymentMethod, $note = '') {
-        $sql = "INSERT INTO Orders (customer_id, total_amount, payment_method, note, order_status_id) 
-                VALUES (:customer_id, :total_amount, :payment_method, :note, 1)";
+    public function createOrder($customerId, $totalAmount, $paymentMethod, $note = '', $couponId = null, $discountAmount = 0) {
+        $sql = "INSERT INTO Orders (customer_id, total_amount, payment_method, note, order_status_id, coupon_id, discount_amount) 
+                VALUES (:customer_id, :total_amount, :payment_method, :note, 1, :coupon_id, :discount_amount)";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':customer_id', $customerId);
         $stmt->bindParam(':total_amount', $totalAmount);
         $stmt->bindParam(':payment_method', $paymentMethod);
         $stmt->bindParam(':note', $note);
+        $stmt->bindParam(':coupon_id', $couponId);
+        $stmt->bindParam(':discount_amount', $discountAmount);
         
         if ($stmt->execute()) {
             return $this->conn->lastInsertId();
