@@ -1,13 +1,13 @@
--- Database schema và dữ liệu mẫu cho hệ thống quản lý bán điện thoại
--- Gộp từ phone_schema.sql và sample_data.sql
--- Date: 2024-11-17
+-- -- Database schema và dữ liệu mẫu cho hệ thống quản lý bán điện thoại
+-- -- Gộp từ phone_schema.sql và sample_data.sql
+-- -- Date: 2024-11-17
 
-CREATE DATABASE IF NOT EXISTS inventory_system;
-USE inventory_system;
+-- CREATE DATABASE IF NOT EXISTS inventory_system;
+-- USE inventory_system;
 
--- ============================================
--- PHẦN 1: TẠO CẤU TRÚC BẢNG
--- ============================================
+-- -- ============================================
+-- -- PHẦN 1: TẠO CẤU TRÚC BẢNG
+-- -- ============================================
 
 -- 1. Managers
 CREATE TABLE Managers (
