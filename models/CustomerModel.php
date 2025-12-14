@@ -4,13 +4,35 @@
 class CustomerModel extends BaseModel {
     
     public function createCustomer($data) {
-        $sql = "INSERT INTO Customers (full_name, phone_number, email, address, gender, date_of_birth) 
-                VALUES (:full_name, :phone_number, :email, :address, :gender, :date_of_birth)";
+        // Đảm bảo cột password tồn tại
+        $this->ensurePasswordColumn();
+        
+        $sql = "INSERT INTO Customers (full_name, phone_number, email, address, gender, date_of_birth, password) 
+                VALUES (:full_name, :phone_number, :email, :address, :gender, :date_of_birth, :password)";
         $stmt = $this->conn->prepare($sql);
         if ($stmt->execute($data)) {
             return $this->conn->lastInsertId();
         }
         return false;
+    }
+    
+    private static $passwordColumnChecked = false;
+    
+    private function ensurePasswordColumn() {
+        // Chỉ kiểm tra 1 lần trong mỗi request
+        if (self::$passwordColumnChecked) {
+            return;
+        }
+        self::$passwordColumnChecked = true;
+        
+        try {
+            $checkColumn = $this->conn->query("SHOW COLUMNS FROM Customers LIKE 'password'");
+            if ($checkColumn && $checkColumn->rowCount() == 0) {
+                $this->conn->exec("ALTER TABLE Customers ADD COLUMN password VARCHAR(255) AFTER email");
+            }
+        } catch (PDOException $e) {
+            // Bỏ qua lỗi nếu cột đã tồn tại
+        }
     }
     
     public function getCustomerById($id) {
@@ -22,6 +44,9 @@ class CustomerModel extends BaseModel {
     }
     
     public function getCustomerByEmail($email) {
+        // Đảm bảo cột password tồn tại
+        $this->ensurePasswordColumn();
+        
         $sql = "SELECT * FROM Customers WHERE email = :email";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':email', $email);

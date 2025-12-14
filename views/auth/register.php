@@ -192,6 +192,41 @@
                                 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label fw-bold">
+                                            <i class="bi bi-lock me-1"></i> Mật Khẩu <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-lock"></i>
+                                            </span>
+                                            <input type="password" class="form-control" id="password" name="password" 
+                                                   placeholder="Nhập mật khẩu" required minlength="6">
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="password-strength" id="passwordStrength"></div>
+                                        <small class="text-muted">Tối thiểu 6 ký tự</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm_password" class="form-label fw-bold">
+                                            <i class="bi bi-lock-fill me-1"></i> Xác Nhận Mật Khẩu <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </span>
+                                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                                   placeholder="Nhập lại mật khẩu" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
                                         <label for="gender" class="form-label fw-bold">
                                             <i class="bi bi-gender-ambiguous me-1"></i> Giới Tính
                                         </label>
@@ -325,6 +360,58 @@
 
 <script>
 $(document).ready(function() {
+    // Toggle password visibility
+    $('#togglePassword').on('click', function() {
+        var passwordInput = $('#password');
+        var icon = $(this).find('i');
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    });
+    
+    $('#toggleConfirmPassword').on('click', function() {
+        var confirmInput = $('#confirm_password');
+        var icon = $(this).find('i');
+        if (confirmInput.attr('type') === 'password') {
+            confirmInput.attr('type', 'text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            confirmInput.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    });
+    
+    // Password strength indicator
+    $('#password').on('input', function() {
+        var password = $(this).val();
+        var strength = $('#passwordStrength');
+        strength.removeClass('weak medium strong');
+        
+        if (password.length === 0) {
+            strength.css('width', '0');
+            return;
+        }
+        
+        var score = 0;
+        if (password.length >= 6) score++;
+        if (password.length >= 8) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        if (score <= 2) {
+            strength.addClass('weak');
+        } else if (score <= 3) {
+            strength.addClass('medium');
+        } else {
+            strength.addClass('strong');
+        }
+    });
+    
     $('#registerForm').on('submit', function(e) {
         var btn = $(this).find('button[type="submit"]');
         var originalText = btn.html();
@@ -334,10 +421,27 @@ $(document).ready(function() {
         var phone = $('#phone_number').val().trim();
         var email = $('#email').val().trim();
         var address = $('#address').val().trim();
+        var password = $('#password').val();
+        var confirmPassword = $('#confirm_password').val();
         
-        if (!fullName || !phone || !email || !address) {
+        if (!fullName || !phone || !email || !address || !password) {
             e.preventDefault();
             showAlert('Vui lòng điền đầy đủ thông tin bắt buộc', 'warning');
+            return false;
+        }
+        
+        // Password validation
+        if (password.length < 6) {
+            e.preventDefault();
+            showAlert('Mật khẩu phải có ít nhất 6 ký tự', 'warning');
+            $('#password').focus();
+            return false;
+        }
+        
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            showAlert('Mật khẩu xác nhận không khớp', 'warning');
+            $('#confirm_password').focus();
             return false;
         }
         

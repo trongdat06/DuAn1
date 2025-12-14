@@ -18,10 +18,11 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 // Autoload classes
 spl_autoload_register(function ($class) {
+    $baseDir = dirname(__DIR__) . '/';
     $paths = [
-        'models/' . $class . '.php',
-        'controllers/' . $class . '.php',
-        'config/' . $class . '.php'
+        $baseDir . 'models/' . $class . '.php',
+        $baseDir . 'controllers/' . $class . '.php',
+        $baseDir . 'config/' . $class . '.php'
     ];
     
     foreach ($paths as $path) {

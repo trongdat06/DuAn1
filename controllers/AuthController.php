@@ -83,13 +83,30 @@ class AuthController extends BaseController {
     
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $password = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
+            
+            // Kiểm tra mật khẩu
+            if (empty($password) || strlen($password) < 6) {
+                $_SESSION['error'] = 'Mật khẩu phải có ít nhất 6 ký tự.';
+                $this->view('auth/register', ['pageTitle' => 'Đăng Ký']);
+                return;
+            }
+            
+            if ($password !== $confirmPassword) {
+                $_SESSION['error'] = 'Mật khẩu xác nhận không khớp.';
+                $this->view('auth/register', ['pageTitle' => 'Đăng Ký']);
+                return;
+            }
+            
             $data = [
                 'full_name' => $_POST['full_name'] ?? '',
                 'phone_number' => $_POST['phone_number'] ?? '',
                 'email' => $_POST['email'] ?? '',
                 'address' => $_POST['address'] ?? '',
                 'gender' => $_POST['gender'] ?? '',
-                'date_of_birth' => $_POST['date_of_birth'] ?? null
+                'date_of_birth' => $_POST['date_of_birth'] ?? null,
+                'password' => password_hash($password, PASSWORD_DEFAULT)
             ];
             
             // Kiểm tra email đã tồn tại chưa
